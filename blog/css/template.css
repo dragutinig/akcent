@@ -1,0 +1,135 @@
+/* General Styles */
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+}
+
+h1, h2, h3 {
+    font-family: 'Poppins', Arial, sans-serif;
+    color: #2c3e50;
+}
+
+.container {
+    width: 100%;
+    max-width: 90ch; /* Ensures the content width is limited to 90 characters */
+    margin: 0 auto; /* Centers the content */
+    padding: 0 20px; /* Adds some padding for better spacing */
+   
+}
+
+/* Article Styles */
+article {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 30px;
+    margin: 20px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: left; /* Text is aligned to the left */
+}
+
+article h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 10px;
+    color: #34495e;
+    text-align: center;
+    max-width: 90ch;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+article .published-at {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+article h2 {
+    font-size: 24px;
+    margin: 20px 0;
+    color: #2980b9;
+    text-align: left; /* Align h2 to the left */
+    max-width: 90ch; /* Keeps the h2 aligned with the text */
+    margin-left: 0;
+}
+
+article p {
+    font-size: 16px;
+    margin: 15px 0;
+    text-align: justify;
+    max-width: 90ch; /* Limits width to 90 characters per line */
+}
+
+article img {
+    display: block;
+    margin: 20px auto;
+    max-width: 90ch; /* Image width will match text width */
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+article a {
+    color: #3c8fe7 !important;
+    text-decoration: underline;
+    transition: color 0.3s ease;
+}
+
+article a:hover {
+    color: #c0392b;
+}
+
+/* Footer Styles */
+footer.main-footer {
+    background-color: #34495e;
+    color: #ecf0f1;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 20px;
+}
+
+footer.main-footer .social-links a {
+    color: #ecf0f1;
+    margin: 0 10px;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+footer.main-footer .social-links a:hover {
+    color: #e74c3c;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    article h1 {
+        font-size: 28px;
+    }
+
+    article h2 {
+        font-size: 20px;
+    }
+
+    article p {
+        font-size: 14px;
+    }
+
+    article img {
+        max-width: 100%;
+        margin: 10px 0;
+        flex-basis: 100%;
+    }
+
+    article .text-content {
+        flex-basis: 100%;
+    }
+}

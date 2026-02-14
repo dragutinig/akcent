@@ -1,0 +1,301 @@
+* {
+    margin: 0;
+    padding: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+   
+  }
+  @font-face {
+    font-family: 'inter'; /*a name to be used later*/
+    src: url('../fonts/Inter/static/Inter-Medium.ttf'); /*URL to font*/
+}
+
+.podnaslov{
+    color:white !important;
+}
+
+@media (min-width:320px)  {
+
+ /* smartphones, iPhone, portrait 480x320 phones */
+main{
+  background-color: #00000012;
+}
+
+
+
+
+.row{
+  justify-content: center;
+  
+}
+.vertical{
+  display:grid;
+  grid-template-rows:1fr 1fr 1fr;
+  height: 90vh;
+}
+
+.vertical2{
+  display:grid;
+  grid-template-rows: 30% 50% 20%;
+  height: 95vh;
+}
+section{
+
+   padding: 100px 0;
+}
+.color{
+  background-color:white;
+}
+
+
+  .section{
+    color: white;
+    position: relative;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items:start;
+        align-content: center;
+    height: 100vh;
+  
+  }
+
+  .section1{
+       padding: 0% !important;
+  }
+    
+    .section1:after {
+    content:'';
+    background: rgb(0,0,0);
+background: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position:bottom;
+    
+    position: absolute;
+    top:0px;
+    left: 0px;
+    width:100%;
+    height:100%;
+    z-index:-1;
+    
+    
+}
+
+.section2{
+  color:black;
+}
+header{
+  height: 100%;
+  justify-content: center;
+  display: flex;
+  align-content: end;
+ 
+}
+.header{
+  font-size: 24px;
+  letter-spacing: -0.016em;
+  line-height: 30px;
+
+}
+
+
+
+.main_h1{
+margin-top: 20px;
+  justify-content: center;
+  text-align: center;
+  color:white;
+ }
+ .main_h3{
+  font-size: 1em;
+  justify-content: center;
+  text-align: center;
+ }
+
+ .buttonYellow{
+  background-color: yellow;
+  color: white;
+ }
+  .button-37:hover {
+    box-shadow: rgba(0, 0, 0, .15) 0 3px 9px 0;
+    transform: translateY(-2px);
+  }
+
+.imgOkovi{
+  height: 80px;
+ cursor: pointer;
+  justify-content: space-evenly !important;
+}
+  
+.okovi{
+
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  
+}
+.blum{
+  background-image: url(../img/blum/download.png);
+  background-size: contain;
+  background-position-y: 8px;
+}
+.gtv{
+  background-image: url(../img/gtv/download.jpg);
+  background-size: contain;
+  background-position-y: 8px;
+}
+.hettich{
+  background-image: url(../img/hettich/hettich-okovi.jpg);
+  background-size: contain;
+}
+.kessebohmer{
+  background-image: url(../img/kessebohmer/kessebohmer.jpg);
+  background-size: contain;
+}
+
+
+.dekoriImg{
+ 
+  height: 80px;
+  justify-content: space-evenly !important;
+  background-color: white;
+}
+
+.dekori{
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  cursor: pointer;
+}
+
+.fundermax{
+  background-image: url(../img/fundermax/fundermax-univer\ \(1\).jpg);
+  background-size: contain;
+
+}
+.Egger{
+  background-image: url(../img/Egger/download.png);
+  background-size: contain;
+}
+.Falco{
+  background-image: url(../img/Falco/falco_logo_icon_170163.png);
+  background-size: contain;
+}
+.Kastamonu{
+    background-image: url(../img/Kastamonu/download.png);
+    background-size: contain;
+}
+.Kronospan{
+  background-image: url(../img/Kronospan/download\ \(1\).png);
+  background-size: contain;
+}
+.Swisspan{
+  background-image: url(../img/Swisspan/SwissPan_logo.jpg.750x320_q85_crop.jpg);
+  background-size: contain;
+}
+
+.paragrafStyle{
+
+  font-size: 20px;
+  letter-spacing: -0.003em;
+  line-height: 32px;
+  word-break: break-word;
+ 
+}
+
+
+
+.buttonDiv{
+  justify-content: center;
+  align-items: end;
+  display: flex;
+}
+
+
+
+footer{
+  background-color: black;
+}
+
+.galerijaTekst{
+text-align: center;
+margin: 50px 0;
+font-size: 22px;
+color: red;
+}
+}
+@media (min-width:481px)  { /* portrait e-readers (Nook/Kindle), smaller tablets @ 600 or @ 640 wide. */
+
+
+  .main_h1{
+    font-size: 2.5em;
+   }
+   .main_h3{
+    font-size: 1.5em;
+   }
+  .imgOkovi{
+    height: 100px;
+  }
+
+  .dekoriImg {
+      height: 200px;
+      background-color: white;
+  }
+
+  .blum{
+
+    background-position-y: 15px;
+  }
+  .gtv{
+ 
+    background-position-y: 15px;
+  }
+
+}
+@media (min-width:641px)  { 
+  /* portrait tablets, portrait iPad, landscape e-readers, landscape 800x480 or 854x480 phones */
+
+  .vertical{
+    display:grid;
+    grid-template-rows:3fr 5fr 1fr;
+    height: 90vh;
+  }
+  .blum{
+
+    background-position-y: 22px;
+  }
+  .gtv{
+ 
+    background-position-y: 22px;
+  }
+
+
+}
+@media (min-width:961px)  { /* tablet, landscape iPad, lo-res laptops ands desktops */ }
+@media (min-width:1025px) { /* big landscape tablets, laptops, and desktops */ }
+@media (min-width:1281px) { /* hi-res laptops and desktops */ }
+
+
+#myBtn {
+  display: none; /* Hidden by default */
+  position: fixed; /* Fixed/sticky position */
+  bottom: 20px; /* Place the button at the bottom of the page */
+  right: 30px; /* Place the button 30px from the right */
+  z-index: 99; /* Make sure it does not overlap */
+  border: none; /* Remove borders */
+  outline: none; /* Remove outline */
+  background-color: black; /* Set a background color */
+  color: white; /* Text color */
+  cursor: pointer; /* Add a mouse pointer on hover */
+  padding: 15px; /* Some padding */
+  border-radius: 10px; /* Rounded corners */
+  font-size: 18px; /* Increase font size */
+}
+
+#myBtn:hover {
+  background-color: #555; /* Add a dark-grey background on hover */
+}

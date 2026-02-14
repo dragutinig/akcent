@@ -1,0 +1,62 @@
+
+    <main class="main-content">
+        <article class="blog-post">
+            <!-- Prikaz naslova i osnovnih informacija -->
+            <header>
+                <h1><?php echo htmlspecialchars($post['title']); ?></h1>
+                <p><?php echo htmlspecialchars($post['description']); ?></p>
+                <p>Category: <?php echo htmlspecialchars($post['category_name']); ?> | Published on <?php echo htmlspecialchars($post['published_at']); ?></p>
+            </header>
+
+            <!-- Prikaz glavne slike -->
+            <img src="../uploads/1-2 DNEVNA SOBA.jpg" alt="Featured Image" class="full-width-image">
+
+            <!-- Sekcija tipova dušeka -->
+            <section>
+                <h2 class="section-title">Understanding Mattress Types</h2>
+                <p class="section-content"><?php echo htmlspecialchars($post['intro']); ?></p>
+                <div class="text-image-section">
+                    <div class="text">
+                        <?php echo htmlspecialchars($post['content_section_1']); ?>
+                    </div>
+                    <img src="../uploads/1-2 DNEVNA SOBA.jpg" alt="Mattress Types">
+                </div>
+            </section>
+
+            <!-- Sekcija veličina dušeka -->
+            <section>
+                <h2 class="section-title">Determine the Right Size</h2>
+                <p class="section-content"><?php echo htmlspecialchars($post['size_intro']); ?></p>
+                <div class="text-image-section">
+                    <div class="text">
+                        <?php echo htmlspecialchars($post['content_section_2']); ?>
+                    </div>
+                    <img src="../uploads/1-2 DNEVNA SOBA.jpg" alt="Mattress Sizes">
+                </div>
+            </section>
+
+            <!-- Sekcija faktora za razmatranje -->
+            <section>
+                <div class="text-image-section">
+                    <img src="../uploads/1-2 DNEVNA SOBA.jpg" alt="Factors to consider">
+                    <div class="text">
+                        <h2 class="section-title">Factors to Consider</h2>
+                        <?php echo htmlspecialchars($post['content_section_3']); ?>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sekcija održavanja -->
+            <section>
+                <h2 class="section-title">Mattress Maintenance Tips</h2>
+                <p class="section-content"><?php echo htmlspecialchars($post['content_section_4']); ?></p>
+                <ul>
+                    <li><strong>ROTATE REGULARLY:</strong> Rotate your mattress 180 degrees every 3-6 months to prevent uneven wear and sagging.</li>
+                    <li><strong>USE A PROTECTIVE COVER:</strong> A waterproof and breathable mattress protector keeps your mattress fresh by shielding it against spills, dust, and allergens.</li>
+                    <li><strong>CLEAN SPILLS IMMEDIATELY:</strong> Spot-clean with a mild detergent and allow it to air dry completely.</li>
+                    <li><strong>VACUUM OCCASIONALLY:</strong> Use a vacuum with an upholstery attachment to remove dust and debris.</li>
+                    <li><strong>SUPPORT MATTERS:</strong> Ensure your mattress is supported by a sturdy frame or foundation.</li>
+                </ul>
+            </section>
+        </article>
+    </main>

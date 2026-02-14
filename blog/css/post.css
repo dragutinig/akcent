@@ -1,0 +1,41 @@
+.post-thumbnail-container {
+    position: relative;
+    overflow: visible; /* Povećaj vrednost overflow-a kako bi se omogućilo da badge bude vidljiv */
+}
+
+.post-thumbnail-container img {
+    width: 100%;
+    display: block;
+}
+
+.badge-row {
+    position: absolute;
+    bottom: -15px; /* Ako želiš da bude malo niže od donje ivice slike */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #fff;
+    padding: 9px 15px 8px;
+    box-shadow: -5px 5px rgb(0 0 0);
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    color: #333;
+    text-transform: uppercase;
+    white-space: nowrap;
+    z-index: 10; /* Povećaj z-index */
+}
+
+.badge-row .badge-item {
+    display: inline-block;
+}
+
+.post-thumbnail-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0));
+    z-index: 1; /* I dalje neka overlay bude ispod badge-a */
+}

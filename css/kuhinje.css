@@ -1,0 +1,156 @@
+@media (min-width:320px)  {
+
+    /* smartphones, iPhone, portrait 480x320 phones */
+
+
+a{
+    color: black;
+}
+
+.imgSpax{
+    background-image:url(../img/spax.jpg);
+    background-position: center;
+    background-size: 50%;
+    background-color: white;
+    background-repeat: no-repeat;
+    height: 20vh;
+
+    
+}
+
+
+.imgblanco{
+    background-image:url(../img/blanco.png);
+    background-position: center;
+    background-size: 50%;
+    background-color: white;
+    background-repeat: no-repeat;
+    height: 20vh;
+
+    
+}
+
+
+.imgfisher{
+    background-image:url(../img/fisher.jpg);
+    background-position: center;
+    background-size: 50%;
+    background-color: white;
+    background-repeat: no-repeat;
+    height: 20vh;
+
+    
+}
+
+.imgInoxa{
+    background-image:url(../img/inoxa.png);
+    background-position: center;
+    background-size: 50%;
+    background-color: white;
+    background-repeat: no-repeat;
+    height: 20vh;
+
+    
+}
+
+
+.section1{
+    background-image: url(../img/crna-kuhinja-po-meri.webp);
+    background-position: center;
+    color: white;
+    background-size: cover;
+    
+}
+
+.mainParagraf{
+    margin-bottom: 20px;
+
+    
+}
+
+.galerija{
+    text-align: center;
+    margin-bottom: 100px;
+}
+
+}
+@media (min-width:641px)  { /* portrait tablets, portrait iPad, landscape e-readers, landscape 800x480 or 854x480 phones */
+
+
+    .imgSpax{
+        background-image:url(../img/spax.jpg);
+        background-position: center;
+        background-size: 50%;
+        background-color: white;
+        background-repeat: no-repeat;
+        height: 30vh;
+        width: 30%;
+        float: left;
+        margin-right: 30px;
+        margin-bottom: 20px;
+    
+        
+    }
+    
+    
+    .imgblanco{
+        background-image:url(../img/blanco.png);
+        background-position: center;
+        background-size: 50%;
+        background-color: white;
+        background-repeat: no-repeat;
+        height: 30vh;
+        width: 30%;
+        float: left;
+        margin-right: 30px;
+        margin-bottom: 20px;
+        
+    }
+    
+    
+    .imgfisher{
+        background-image:url(../img/fisher.jpg);
+        background-position: center;
+        background-size: 50%;
+        background-color: white;
+        background-repeat: no-repeat;
+        height: 30vh;
+        width: 30%;
+        float: left;
+        margin-right: 30px;
+        margin-bottom: 20px;
+        
+    }
+    
+    .imgInoxa{
+        background-image:url(../img/inoxa.png);
+        background-position: center;
+        background-size: 50%;
+        background-color: white;
+        background-repeat: no-repeat;
+        height: 30vh;
+        width: 30%;
+        float: left;
+        margin-right: 30px;
+        margin-bottom: 20px;
+    }
+    
+    
+    .section1{
+        background-image: url(../img/crna-kuhinja-po-meri.webp);
+        background-position: center;
+        color: white;
+        background-size: cover;
+        
+    }
+    
+    .mainParagraf{
+        margin-bottom: 20px;
+        font-size: 22px;
+        
+    }
+
+}
+@media (min-width:961px)  { /* tablet, landscape iPad, lo-res laptops ands desktops */ }
+@media (min-width:1025px) { /* big landscape tablets, laptops, and desktops */ }
+@media (min-width:1281px) { /* hi-res laptops and desktops */ }

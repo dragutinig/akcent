@@ -1,0 +1,100 @@
+
+header{
+    display:block !important;
+}
+tbody{
+    background-color: #00000094 !important;
+}
+.contact-card {
+    text-align: center;
+    padding: 15px; /* Manje paddinga za kompaktniji dizajn */
+    border: 1px solid #ddd;
+    border-radius: 10px;
+
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex: 1 1 calc(20% - 15px); /* Manje kartice i razmak */
+    margin: 10px; /* Razmak između kartica */
+    max-width: 250px; /* Smanjena maksimalna širina svake kartice */
+}
+
+.contact-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.contact-card .icon {
+    width: 40px; /* Manje ikone */
+    height: 40px;
+    margin-bottom: 10px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin: 0 auto 10px;
+}
+
+.phone-icon {
+    background-image: url('../img/social-icone/phone-call.png');
+}
+
+.email-icon {
+    background-image: url('../img/social-icone/gmail.png');
+}
+
+.viber-icon {
+    background-image: url('../img/social-icone/viber.png');
+}
+
+.whatsapp-icon {
+    background-image: url('../img/social-icone/whatsapp.png');
+}
+
+/* Raspored kartica u redu na velikim ekranima */
+.contact-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Centriranje kartica */
+    gap: 15px; /* Manji razmak između kartica */
+}
+
+.contact-card p {
+    font-size: 0.85rem; /* Smanjena veličina fonta za tekst */
+    line-height: 1.4; /* Bolja čitljivost */
+    word-wrap: break-word; /* Prelamanje reči ako je tekst predugačak */
+}
+
+.contact-card .h4 {
+    font-size: 1rem; /* Smanjena veličina za kontakt informacije */
+    line-height: 1.2;
+}
+
+/* Ispravka za e-mail adresu da ne izlazi iz kartice */
+.email p:last-child {
+    word-wrap: break-word;
+    white-space: normal; /* Omogućava prelamanje e-mail adrese */
+}
+
+/* Responsiv dizajn za manje ekrane */
+@media (max-width: 768px) {
+    .contact-card {
+        flex: 1 1 calc(50% - 15px); /* Kartice se prilagođavaju u dve kolone */
+        max-width: 100%; /* Uklanjanje maksimalne širine za mobilni prikaz */
+        margin: 10px auto; /* Margina za centriranje */
+    }
+
+    .contact-container {
+        flex-direction: row; /* I dalje horizontalni raspored na većim mobilnim ekranima */
+        align-items: center; /* Centriranje u koloni */
+    }
+}
+
+@media (max-width: 480px) {
+    .contact-card {
+        flex: 1 1 100%; /* Kartice se postavljaju jedna ispod druge na malim ekranima */
+        max-width: 100%; 
+    }
+
+    .contact-container {
+        flex-direction: column; /* Vertikalni raspored na najužim ekranima */
+        align-items: center;
+    }
+}

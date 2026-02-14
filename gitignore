@@ -1,0 +1,48 @@
+# --- Secrets / local config ---
+.env
+.env.*
+!.env.example
+config.php
+config.local.php
+config/*.local.php
+*.key
+*.pem
+
+# --- Dependencies ---
+/vendor/
+/node_modules/
+
+# --- Build / cache / temp ---
+/dist/
+/build/
+/.cache/
+/tmp/
+/temp/
+/storage/logs/
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/views/
+cache/
+logs/
+*.log
+
+# --- Uploads / user-generated content (usually not for git) ---
+uploads/
+public/uploads/
+storage/app/public/
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# --- IDE / OS files ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# --- Misc ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

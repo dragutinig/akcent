@@ -1,0 +1,87 @@
+/* Generalno podešavanje tela stranice */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #fafafa;
+}
+
+/* Galerija sa dinamičkim rasporedom slika u masonry stilu */
+.gallery-grid {
+    column-count: 3;  /* Broj kolona u galeriji */
+    column-gap: 20px; /* Razmak između kolona */
+    padding: 0;
+}
+
+/* Stilizacija za slike unutar galerije */
+.gallery-grid img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    margin-bottom: 20px; /* Razmak između slika */
+}
+
+/* Slike unutar galerije */
+.gallery-item {
+    display: inline-block;
+    width: 100%;  /* Svaka slika zauzima celu širinu svoje kolone */
+    break-inside: avoid; /* Ovaj property sprečava preklapanje slika */
+}
+
+/* Modal slika */
+#modalImage {
+    max-width: 100%;
+    max-height: 80vh; /* Maksimalna visina za bolji pregled */
+}
+
+/* Dugmadi za navigaciju slika */
+.modal-footer .btn {
+    width: 45%;
+}
+
+/* Efekat prilikom klika na slike */
+.gallery-item a {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: block;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.gallery-item:hover a {
+    opacity: 1;
+}
+
+/* Stilizacija za glavni naslov galerije */
+header h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Stilizacija za podnaslov galerije */
+header p {
+    font-size: 1.25rem;
+    color: #666;
+    text-align: center;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto 40px auto;
+}
+
+/* Mediji upiti za manje ekrane */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2.5rem;
+    }
+    header p {
+        font-size: 1.125rem;
+    }
+}

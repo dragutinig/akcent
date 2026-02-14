@@ -1,0 +1,12 @@
+[01-Feb-2026 20:18:59 Europe/Belgrade] PHP Fatal error:  Uncaught Error: Failed opening required '/home/akcentrs/public_html/form-handler/PHPMailer/PHPMailer.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/akcentrs/public_html/form-handler/send-form.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/akcentrs/public_html/form-handler/send-form.php on line 7
+[01-Feb-2026 20:19:05 Europe/Belgrade] PHP Fatal error:  Uncaught Error: Failed opening required '/home/akcentrs/public_html/form-handler/PHPMailer/PHPMailer.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/akcentrs/public_html/form-handler/send-form.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/akcentrs/public_html/form-handler/send-form.php on line 7
+[01-Feb-2026 20:21:14 Europe/Belgrade] PHP Fatal error:  Uncaught Error: Failed opening required '/home/akcentrs/public_html/form-handler/PHPMailer/PHPMailer.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home/akcentrs/public_html/form-handler/send-form.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/akcentrs/public_html/form-handler/send-form.php on line 7

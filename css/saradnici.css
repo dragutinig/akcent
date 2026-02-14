@@ -1,0 +1,26 @@
+
+.imgMain{
+    
+display: grid;
+grid-template-columns:auto;
+grid-template-rows: 1fr 1fr 1fr;
+
+}
+
+.materijalImg{
+
+    margin: 0 50px;
+    height: 50px;
+      
+}
+
+.kula{
+  
+}
+
+.tis{
+}
+
+.agacija{
+ 
+}
