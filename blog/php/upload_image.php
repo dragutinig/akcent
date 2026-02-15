@@ -1,10 +1,15 @@
 <?php
 if (isset($_FILES['file'])) {
     $upload_dir = '../uploads/';
+header('Content-Type: application/json; charset=utf-8');
+require_once 'upload_utils.php';
 
     // Kreiraj folder ako ne postoji
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0777, true);
+try {
+    if (!isset($_FILES['file'])) {
+        throw new RuntimeException('Nije poslata nijedna datoteka.');
     }
 
     $file_name = basename($_FILES['file']['name']);
@@ -27,6 +32,10 @@ if (isset($_FILES['file'])) {
         echo json_encode(['error' => 'Greška pri uploadu slike.']);
     }
 } else {
+    $url = processUploadedImage($_FILES['file']);
+    echo json_encode(['location' => $url], JSON_UNESCAPED_UNICODE);
+} catch (Throwable $e) {
     http_response_code(400);
     echo json_encode(['error' => 'Nije poslata nijedna datoteka.']);
-}
+    echo json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+}?>

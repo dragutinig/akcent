@@ -2,10 +2,10 @@
 
 class Database
 {
-     private $host = 'localhost'; // Vaš hostname za MySQL bazu
-    private $username = 'akcentrs_blogdatabase'; // Vaše korisničko ime za bazu
-    private $password = 'Dragigagi1'; // Vaša lozinka za bazu
-    private $dbname = 'akcentrs_blogdatabase'; // Ime baze podataka
+    private $host = '127.0.0.1'; // Vaš hostname za MySQL bazu
+    private $username = 'root'; // Vaše korisničko ime za bazu
+    private $password = ''; // Vaša lozinka za bazu
+    private $dbname = 'akcentrs'; // Ime baze podataka
     private $conn;
 
     public function connect()

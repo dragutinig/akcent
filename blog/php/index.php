@@ -25,54 +25,60 @@ if (!$posts) {
 <html lang="en">
 
 <head>
-    
-    
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-HDLXHWERJK"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-HDLXHWERJK');
-</script>
-    
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HDLXHWERJK"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-HDLXHWERJK');
+    </script>
+
+
     <title>Inspiracija, trendovi i prakticni saveti u enterijeru</title>
-     <meta name="description" content="Saveti i inspiracija za uređenje doma – od izbora nameštaja do najnovijih trendova u enterijeru. Kreirajte funkcionalan prostor sa stilom">
-     <link rel="canonical" href="https://akcent.rs/blog/php/" />
+    <meta name="description"
+        content="Saveti i inspiracija za uređenje doma – od izbora nameštaja do najnovijih trendova u enterijeru. Kreirajte funkcionalan prostor sa stilom">
+    <link rel="canonical" href="https://akcent.rs/blog/php/" />
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <script src="../js/main.js"></script>
-    <link rel="stylesheet" href="/blog/css/style.css">
-      <link rel="stylesheet" href="/blog/css/post.css">
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    <script src="../js/main.js"></script>
+    <link rel="stylesheet" href="/akcentProjekat/akcent-sprint/akcent-main/blog/css/style.css">
+    <link rel="stylesheet" href="/akcentProjekat/akcent-sprint/akcent-main/blog/css/post.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-       <style>
+    <style>
         footer {
-    background-color: black;
-}
-        </style>
-     
-     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Blog",
-  "name": "Akcent Blog",
-  "url": "https://akcent.rs/blog/php/",
-  "description": "Akcent Blog donosi savete, ideje i inspiraciju za uređenje doma – od izbora nameštaja do najnovijih trendova u enterijeru.",
-  "publisher": {
-    "@type": "Organization",
-    "name": "Akcent Nameštaj",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://akcent.rs/img/akcent-namestaj-logo.png"
-    }
-  }
-}
-</script>
-   
-        
+            background-color: black;
+        }
+    </style>
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Blog",
+            "name": "Akcent Blog",
+            "url": "https://akcent.rs/blog/php/",
+            "description": "Akcent Blog donosi savete, ideje i inspiraciju za uređenje doma – od izbora nameštaja do najnovijih trendova u enterijeru.",
+            "publisher": {
+                "@type": "Organization",
+                "name": "Akcent Nameštaj",
+                "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://akcent.rs/img/akcent-namestaj-logo.png"
+                }
+            }
+        }
+    </script>
+
+
 </head>
 
 <body>
@@ -81,33 +87,36 @@ if (!$posts) {
 
     <!-- Posts Section -->
     <section class="posts">
-    <div class="container">
-        <h1 class="h1-index">Inspiracija, trendovi i praktični saveti u enterijeru</h1>
-        <div class="post-grid">
-            <?php while ($post = $posts->fetch_assoc()): ?>
-            <div class="post">
-                <a href="/blog/<?php echo $post['category_slug']; ?>/<?php echo $post['slug']; ?>" class="post-link">
-                    <div class="post-thumbnail-container">
-                        <img src="<?php echo $post['featured_image']; ?>" alt="<?php echo $post['title']; ?>">
-                        <div class="badge-row">
-                            <span class="badge-item post-primary-category">
-                                <?php echo ucfirst($post['category_slug']); ?>
-                            </span>
-                        </div>
+        <div class="container">
+            <h1 class="h1-index">Inspiracija, trendovi i praktični saveti u enterijeru</h1>
+            <div class="post-grid">
+                <?php while ($post = $posts->fetch_assoc()): ?>
+                    <div class="post">
+                        <a href="/akcentProjekat/akcent-sprint/akcent-main/blog/<?php echo $post['category_slug']; ?>/<?php echo $post['slug']; ?>" "
+                        
+                            class=" post-link">
+                            <div class="post-thumbnail-container">
+                                <img src="<?php echo $post['featured_image']; ?>" alt="<?php echo $post['title']; ?>">
+                                <div class="badge-row">
+                                    <span class="badge-item post-primary-category">
+                                        <?php echo ucfirst($post['category_slug']); ?>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="post-content">
+                                <h2><?php echo $post['title']; ?></h2>
+                                <p><?php echo strip_tags(substr($post['content'], 0, 300)); ?></p>
+                            </div>
+                        </a>
+                        <a href="/blog/<?php echo $post['category_slug']; ?>/<?php echo $post['slug']; ?>"
+                            class="read-more">Read more</a>
                     </div>
-                    <div class="post-content">
-                        <h2><?php echo $post['title']; ?></h2>
-                        <p><?php echo strip_tags(substr($post['content'], 0, 300)); ?></p>
-                    </div>
-                </a>
-                <a href="/blog/<?php echo $post['category_slug']; ?>/<?php echo $post['slug']; ?>" class="read-more">Read more</a>
+                <?php endwhile; ?>
             </div>
-            <?php endwhile; ?>
         </div>
-    </div>
-</section>
+    </section>
 
- <?php include("../../komponente/cookie-banner.php"); ?>
+    <?php include("../../komponente/cookie-banner.php"); ?>
     <!-- Include Footer -->
     <?php include '../../komponente/footer.php'; ?>
 

@@ -1,0 +1,52 @@
+
++:root {
++  --admin-bg: #f5f7fb;
++  --admin-card: #ffffff;
++  --admin-text: #1f2a37;
++  --admin-muted: #6b7280;
++  --admin-primary: #0d6efd;
++}
++
++body.admin-body {
++  background: var(--admin-bg);
++  color: var(--admin-text);
++}
++
++.admin-shell {
++  max-width: 1240px;
++  margin: 24px auto;
++  padding: 0 16px;
++}
++
++.admin-topbar {
++  display: flex;
++  justify-content: space-between;
++  align-items: center;
++  margin-bottom: 16px;
++}
++
++.admin-card {
++  background: var(--admin-card);
++  border-radius: 14px;
++  padding: 16px;
++  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
++}
++
++.admin-kpi {
++  font-size: 1.4rem;
++  font-weight: 700;
++}
++
++.table td, .table th { vertical-align: middle; }
++
++.admin-actions {
++  display: flex;
++  gap: 8px;
++  flex-wrap: wrap;
++}
++
++.form-auth-wrap {
++  max-width: 520px;
++  margin: 48px auto;
++}
+ 
