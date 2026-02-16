@@ -1,30 +1,30 @@
-document.addEventListener("DOMContentLoaded", function() {
-    // Kada korisnik klikne na "Prihvatam"
-    document.getElementById("accept-cookies").addEventListener("click", function() {
-        // Postavi kolačić koji označava da je korisnik prihvatio kolačiće
-        document.cookie = "cookie_accepted=true; path=/; max-age=" + 60 * 60 * 24 * 365; // Kolačić važi 1 godinu
-        // Sakrij banner
-        document.getElementById("cookie-banner").style.display = "none";
-    });
-});
+document.addEventListener('DOMContentLoaded', function () {
+    const acceptCookiesButton = document.getElementById('accept-cookies');
+    const cookieBanner = document.getElementById('cookie-banner');
 
+    if (acceptCookiesButton && cookieBanner) {
+        acceptCookiesButton.addEventListener('click', function () {
+            document.cookie = 'cookie_accepted=true; path=/; max-age=' + 60 * 60 * 24 * 365;
+            cookieBanner.style.display = 'none';
+        });
+    }
 
+    const toggle = document.querySelector('.dropdown-toggle');
+    const menu = document.querySelector('.dropdown-menu');
 
-   // JavaScript za otvaranje/zatvaranje dropdown menija
-    document.addEventListener('DOMContentLoaded', function () {
-        const toggle = document.querySelector('.dropdown-toggle');
-        const menu = document.querySelector('.dropdown-menu');
-
+    if (toggle && menu) {
         toggle.addEventListener('click', function (e) {
-            e.preventDefault(); // Sprečava skakanje stranice
-            const isOpen = menu.style.display === 'block';
-            menu.style.display = isOpen ? 'none' : 'block';
+            e.preventDefault();
+            const isOpen = menu.classList.contains('open');
+            menu.classList.toggle('open', !isOpen);
+            toggle.setAttribute('aria-expanded', (!isOpen).toString());
         });
 
-        // Zatvori meni kada se klikne van njega
         document.addEventListener('click', function (e) {
             if (!menu.contains(e.target) && !toggle.contains(e.target)) {
-                menu.style.display = 'none';
+                menu.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
             }
         });
-    });
+    }
+});

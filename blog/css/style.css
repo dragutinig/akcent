@@ -16,6 +16,23 @@ a {
 }
 
 
+
+.dropdown-toggle {
+    background: transparent;
+    border: 0;
+    transition: color 0.3s;
+    color: #def1f0 !important;
+    display: inline-block;
+    outline: 0;
+    font-weight: 400;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.dropdown-toggle:focus {
+    outline: 2px solid #f8c246;
+    outline-offset: 2px;
+}
 nav>a{
     transition: color 0.3s;
     color: #def1f0 !important;
@@ -267,6 +284,18 @@ a:hover {
     color: #007bff;
 }
 
+
+.admin-entry-link {
+    margin-right: 12px;
+    opacity: 0.35;
+    color: #f8c246 !important;
+    font-size: 18px;
+}
+
+.admin-entry-link:hover {
+    opacity: 1;
+}
+
 /* Dropdown meni */
 .dropdown-menu {
     display: none;
@@ -303,6 +332,10 @@ a:hover {
 }
 
 
+
+.dropdown-menu.open {
+    display: block;
+}
 /* Stilizovanje za manji ekran - sve ostalo je isto */
 @media (max-width: 768px) {
    .dropdown-menu {
