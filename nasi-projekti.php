@@ -79,7 +79,7 @@ function resolveProjectAssetUrl(string $rawPath): string
             $cover = $project['images'][0]['image_path'] ?? '';
             $coverUrl = resolveProjectAssetUrl((string) $cover);
         ?>
-        <article class="project-card">
+        <article class="project-card" data-month="<?php echo htmlspecialchars($ts ? date('m', $ts) : '', ENT_QUOTES, 'UTF-8'); ?>" data-year="<?php echo htmlspecialchars($ts ? date('Y', $ts) : '', ENT_QUOTES, 'UTF-8'); ?>">
             <?php if ($coverUrl !== ''): ?>
                 <img src="<?php echo htmlspecialchars($coverUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>" loading="lazy">
             <?php endif; ?>
@@ -99,5 +99,23 @@ function resolveProjectAssetUrl(string $rawPath): string
 <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
 <script src="js/plugins.js"></script>
 <script src="js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const month = document.getElementById('project-month');
+    const year = document.getElementById('project-year');
+    const cards = document.querySelectorAll('.project-card');
+
+    function filterProjects() {
+        cards.forEach(function (card) {
+            const monthOk = !month.value || card.dataset.month === month.value;
+            const yearOk = !year.value || card.dataset.year === year.value;
+            card.style.display = monthOk && yearOk ? '' : 'none';
+        });
+    }
+
+    month.addEventListener('change', filterProjects);
+    year.addEventListener('change', filterProjects);
+});
+</script>
 </body>
 </html>
