@@ -2,13 +2,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-session_start();
 require_once 'Database.php';
-
-if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
-    header('Location: login.php');
-    exit();
-}
+require_once 'admin_bootstrap.php';
 
 function generate_slug(string $text): string
 {
@@ -147,14 +142,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             selector: '#content',
             height: 420,
             menubar: false,
-            plugins: ['anchor','autolink','charmap','codesample','emoticons','image','link','lists','media','searchreplace','table','visualblocks','wordcount'],
+            plugins: ['anchor','autolink','charmap','codesample','emoticons','image','link','lists','media','paste','searchreplace','table','visualblocks','wordcount'],
+            paste_as_text: true,
+            forced_root_block: 'p',
+            remove_trailing_brs: true,
+            invalid_elements: 'font',
+            content_css: '../css/editor-content.css',
+            content_style: 'body{max-width:840px;margin:16px auto;padding:0 14px;} p{margin:0 0 1em;line-height:1.75;}',
             toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline | link image media table | align lineheight | checklist numlist bullist | emoticons charmap | removeformat'
         });
     </script>
 </head>
 
 <body>
-    <main class="admin-wrap">
+    <?php $current = 'create'; ?>
+    <main class="admin-shell">
+        <?php include "admin_sidebar.php"; ?>
+        <section class="admin-content">
         <section class="topbar">
             <div>
                 <h1>Izmena posta #<?= (int) $post_id; ?></h1>
@@ -234,6 +238,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </form>
             </div>
         </section>
+            </section>
     </main>
 </body>
 

@@ -1,11 +1,6 @@
 <?php
-session_start();
 require_once 'Database.php';
-
-if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
-    header('Location: login.php');
-    exit();
-}
+require_once 'admin_bootstrap.php';
 
 $database = new Database();
 $db = $database->connect();
@@ -82,10 +77,7 @@ if (isset($_GET['edit'])) {
     }
 }
 
-function esc(string $v): string
-{
-    return htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
-}
+$current = 'categories';
 ?>
 <!DOCTYPE html>
 <html lang="sr">
@@ -98,7 +90,9 @@ function esc(string $v): string
 </head>
 
 <body>
-    <main class="admin-wrap">
+    <main class="admin-shell">
+        <?php include "admin_sidebar.php"; ?>
+        <section class="admin-content">
         <section class="topbar">
             <div>
                 <h1>Kategorije</h1>
@@ -110,8 +104,8 @@ function esc(string $v): string
             </div>
         </section>
 
-        <?php if ($message): ?><div class="alert alert-success"><?= esc($message); ?></div><?php endif; ?>
-        <?php if ($error): ?><div class="alert alert-danger"><?= esc($error); ?></div><?php endif; ?>
+        <?php if ($message): ?><div class="alert alert-success"><?= admin_esc($message); ?></div><?php endif; ?>
+        <?php if ($error): ?><div class="alert alert-danger"><?= admin_esc($error); ?></div><?php endif; ?>
 
         <section class="section">
             <div class="section-header"><h2>Dodaj novu kategoriju</h2></div>
@@ -142,11 +136,11 @@ function esc(string $v): string
                         <input type="hidden" name="id" value="<?= (int) $editCategory['id']; ?>">
                         <div class="form-group">
                             <label for="edit_name">Naziv</label>
-                            <input id="edit_name" type="text" name="name" value="<?= esc($editCategory['name']); ?>" required>
+                            <input id="edit_name" type="text" name="name" value="<?= admin_esc($editCategory['name']); ?>" required>
                         </div>
                         <div class="form-group">
                             <label for="edit_slug">Slug</label>
-                            <input id="edit_slug" type="text" name="slug" value="<?= esc($editCategory['slug']); ?>" required>
+                            <input id="edit_slug" type="text" name="slug" value="<?= admin_esc($editCategory['slug']); ?>" required>
                         </div>
                         <div class="form-group full">
                             <button class="btn btn-info" type="submit">Sačuvaj izmene</button>
@@ -167,8 +161,8 @@ function esc(string $v): string
                         <?php while ($cat = $categories->fetch_assoc()): ?>
                             <tr>
                                 <td><?= (int) $cat['id']; ?></td>
-                                <td><?= esc($cat['name']); ?></td>
-                                <td><?= esc($cat['slug']); ?></td>
+                                <td><?= admin_esc($cat['name']); ?></td>
+                                <td><?= admin_esc($cat['slug']); ?></td>
                                 <td>
                                     <a class="btn btn-info btn-sm" href="categories.php?edit=<?= (int) $cat['id']; ?>">Izmeni</a>
                                     <a class="btn btn-danger btn-sm" href="categories.php?delete=<?= (int) $cat['id']; ?>" onclick="return confirm('Obrisati kategoriju?');">Obriši</a>
@@ -179,6 +173,7 @@ function esc(string $v): string
                 </table>
             </div>
         </section>
+            </section>
     </main>
 </body>
 

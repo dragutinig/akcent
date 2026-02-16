@@ -70,6 +70,32 @@ function getDbConfig(): array
         'username' => getEnvOrDefault('AKCENT_DB_USER', $defaultUser),
         'password' => getEnvOrDefault('AKCENT_DB_PASS', $defaultPassword),
         'dbname' => getEnvOrDefault('AKCENT_DB_NAME', $defaultDbName),
-        'dbname' => getEnvOrDefault('AKCENT_DB_NAME', 'akcentrs_blogdatabase'),
     ];
+}
+
+
+function resolveImageUrl(string $rawPath): string
+{
+    $rawPath = trim($rawPath);
+    if ($rawPath === '') {
+        return getBlogBasePath() . '/uploads/placeholder.jpg';
+    }
+
+    if (preg_match('#^https?://#i', $rawPath)) {
+        return $rawPath;
+    }
+
+    if ($rawPath[0] === '/') {
+        return $rawPath;
+    }
+
+    if (strpos($rawPath, '../') === 0) {
+        return getBlogBasePath() . '/' . ltrim(substr($rawPath, 3), '/');
+    }
+
+    if (strpos($rawPath, 'uploads/') === 0) {
+        return getBlogBasePath() . '/' . $rawPath;
+    }
+
+    return getBlogBasePath() . '/uploads/' . ltrim($rawPath, '/');
 }

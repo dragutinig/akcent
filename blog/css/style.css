@@ -284,6 +284,18 @@ a:hover {
     color: #007bff;
 }
 
+
+.admin-entry-link {
+    margin-right: 12px;
+    opacity: 0.35;
+    color: #f8c246 !important;
+    font-size: 18px;
+}
+
+.admin-entry-link:hover {
+    opacity: 1;
+}
+
 /* Dropdown meni */
 .dropdown-menu {
     display: none;

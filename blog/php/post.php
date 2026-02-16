@@ -69,7 +69,7 @@ $tagsString = implode(', ', $tags);
 
 
 $relativePath = $post['featured_image'];
-$absolutePath = str_replace("../", getBlogBaseUrl() . "/", $relativePath);
+$absolutePath = resolveImageUrl($relativePath);
 ?>
 
 

@@ -89,7 +89,7 @@ if (!$posts) {
             <div class="post">
                 <a href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/<?php echo $post['category_slug']; ?>/<?php echo $post['slug']; ?>" class="post-link">
                     <div class="post-thumbnail-container">
-                        <img src="<?php echo $post['featured_image']; ?>" alt="<?php echo $post['title']; ?>">
+                        <img src="<?php echo htmlspecialchars(resolveImageUrl($post['featured_image'])); ?>" alt="<?php echo htmlspecialchars($post['title']); ?>">
                         <div class="badge-row">
                             <span class="badge-item post-primary-category">
                                 <?php echo ucfirst($post['category_slug']); ?>
