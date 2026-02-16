@@ -44,6 +44,17 @@ class ProjectRepository
             INDEX idx_project_images_project (project_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+        $this->db->query("CREATE TABLE IF NOT EXISTS project_models (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            project_id INT UNSIGNED NOT NULL,
+            model_label VARCHAR(255) DEFAULT NULL,
+            model_path VARCHAR(500) NOT NULL,
+            sort_order INT NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT fk_project_models_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            INDEX idx_project_models_project (project_id, sort_order, id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
         $this->db->query("CREATE TABLE IF NOT EXISTS project_comments (
             id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             project_id INT UNSIGNED NOT NULL,
@@ -149,6 +160,7 @@ class ProjectRepository
             $row['model_path'] = $this->normalizeStoredPath($row['model_path'] ?? '');
             $row['blog_post_url'] = $this->normalizeStoredPath($row['blog_post_url'] ?? '');
             $row['images'] = $this->listProjectImages((int) $row['id']);
+            $row['models'] = $this->listProjectModels((int) $row['id']);
             $rows[] = $row;
         }
         return $rows;
@@ -166,7 +178,31 @@ class ProjectRepository
         $project['model_path'] = $this->normalizeStoredPath($project['model_path'] ?? '');
         $project['blog_post_url'] = $this->normalizeStoredPath($project['blog_post_url'] ?? '');
         $project['images'] = $this->listProjectImages((int) $project['id']);
+        $project['models'] = $this->listProjectModels((int) $project['id']);
         return $project;
+    }
+
+    public function addProjectModel(int $projectId, array $model): void
+    {
+        $sql = "INSERT INTO project_models (project_id, model_label, model_path, sort_order)
+                VALUES (?, ?, ?, ?)";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param('issi', $projectId, $model['model_label'], $model['model_path'], $model['sort_order']);
+        $stmt->execute();
+    }
+
+    public function listProjectModels(int $projectId): array
+    {
+        $stmt = $this->db->prepare('SELECT * FROM project_models WHERE project_id = ? ORDER BY sort_order ASC, id ASC');
+        $stmt->bind_param('i', $projectId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $rows = [];
+        while ($r = $res->fetch_assoc()) {
+            $r['model_path'] = $this->normalizeStoredPath($r['model_path'] ?? '');
+            $rows[] = $r;
+        }
+        return $rows;
     }
 
     public function listProjectImages(int $projectId): array

@@ -49,8 +49,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $comments = $repo->listApprovedComments((int) $project['id'], 20);
-$modelUrl = trim((string) ($project['model_path'] ?? ''));
-$modelUrl = $modelUrl !== '' ? (strpos($modelUrl, 'http') === 0 ? $modelUrl : buildPublicUrlFromPath($modelUrl)) : '';
+$projectModels = $project['models'] ?? [];
+if (empty($projectModels) && !empty($project['model_path'])) {
+    $projectModels[] = [
+        'model_label' => '3D model',
+        'model_path' => $project['model_path'],
+    ];
+}
+
 $blogUrl = trim((string) ($project['blog_post_url'] ?? ''));
 $blogUrl = $blogUrl !== '' ? (strpos($blogUrl, 'http') === 0 ? $blogUrl : buildPublicUrlFromPath($blogUrl)) : '';
 $metaTitle = trim((string) ($project['meta_title'] ?? '')) ?: $project['title'];
@@ -81,7 +87,17 @@ $metaDesc = trim((string) ($project['meta_description'] ?? ''));
         <?php if (!empty($project['excerpt'])): ?><p><?php echo htmlspecialchars($project['excerpt'], ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>
 
         <div class="d-flex flex-wrap gap-2 mb-3">
-            <?php if ($modelUrl !== ''): ?><a class="btn btn-dark" target="_blank" rel="noopener" href="<?php echo htmlspecialchars($modelUrl, ENT_QUOTES, 'UTF-8'); ?>">Otvori 3D model</a><?php endif; ?>
+            <?php foreach ($projectModels as $index => $model): ?>
+                <?php
+                $modelPath = trim((string) ($model['model_path'] ?? ''));
+                if ($modelPath === '') {
+                    continue;
+                }
+                $modelUrl = strpos($modelPath, 'http') === 0 ? $modelPath : buildPublicUrlFromPath($modelPath);
+                $modelLabel = trim((string) ($model['model_label'] ?? '')) ?: ('3D model ' . ($index + 1));
+                ?>
+                <a class="btn btn-dark" target="_blank" rel="noopener" href="<?php echo htmlspecialchars($modelUrl, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($modelLabel, ENT_QUOTES, 'UTF-8'); ?></a>
+            <?php endforeach; ?>
             <?php if ($blogUrl !== ''): ?><a class="btn btn-outline-secondary" href="<?php echo htmlspecialchars($blogUrl, ENT_QUOTES, 'UTF-8'); ?>">Povezani blog post</a><?php endif; ?>
         </div>
 
