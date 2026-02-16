@@ -2,5 +2,6 @@
 
 # Allow crawling of all content
 User-agent: *
-Disallow:
+Disallow: /blog/php/client_3d_view.php
+Disallow: /blog/private-models/
 Sitemap: https://akcent.rs/sitemap.xml

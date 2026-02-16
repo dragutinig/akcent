@@ -29,31 +29,40 @@ function pslug($text)
 
 function find_model_entry_html($directoryAbs, $folderName)
 {
-    $candidates = [
-        $directoryAbs . '/' . $folderName . '.html',
-        $directoryAbs . '/index.html',
-        $directoryAbs . '/model.html',
-    ];
+    $iter = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($directoryAbs, FilesystemIterator::SKIP_DOTS)
+    );
 
-    foreach ($candidates as $file) {
-        if (is_file($file)) {
-            return basename($file);
+    $fallback = '';
+    foreach ($iter as $f) {
+        if (!$f->isFile()) {
+            continue;
+        }
+
+        if (!preg_match('/\.html?$/i', $f->getFilename())) {
+            continue;
+        }
+
+        $full = $f->getPathname();
+        $rel = ltrim(str_replace($directoryAbs, '', $full), DIRECTORY_SEPARATOR);
+        if (strcasecmp($f->getFilename(), $folderName . '.html') === 0) {
+            return str_replace(DIRECTORY_SEPARATOR, '/', $rel);
+        }
+        if ($fallback === '') {
+            $fallback = str_replace(DIRECTORY_SEPARATOR, '/', $rel);
         }
     }
 
-    $files = scandir($directoryAbs);
-    if (!is_array($files)) {
-        return '';
-    }
-
-    foreach ($files as $file) {
-        if (preg_match('/\.html?$/i', $file)) {
-            return $file;
-        }
-    }
-
-    return '';
+    return $fallback;
 }
+
+function default_image_text($name)
+{
+    $base = pathinfo($name, PATHINFO_FILENAME);
+    $base = str_replace(array('-', '_'), ' ', $base);
+    return ucwords(trim($base));
+}
+
 
 $message = '';
 $error = '';
@@ -150,8 +159,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $size = @getimagesize($destAbs);
                         $repo->addProjectImage($projectId, [
                             'image_path' => $imageStorageRel . '/' . $fileName,
-                            'alt_text' => trim($altTexts[$i] ?? ''),
-                            'title_text' => trim($titleTexts[$i] ?? ''),
+                            'alt_text' => trim(($altTexts[$i] ?? '') !== '' ? $altTexts[$i] : default_image_text($name)),
+                            'title_text' => trim(($titleTexts[$i] ?? '') !== '' ? $titleTexts[$i] : default_image_text($name)),
                             'sort_order' => $i,
                             'width' => $size ? (int) $size[0] : null,
                             'height' => $size ? (int) $size[1] : null,

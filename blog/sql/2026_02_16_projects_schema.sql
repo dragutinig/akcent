@@ -43,3 +43,19 @@ CREATE TABLE IF NOT EXISTS project_comments (
     CONSTRAINT fk_project_comments_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
     INDEX idx_project_comments_project_status (project_id, status, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Privatni 3D preview linkovi za klijente (van javnog sajta)
+CREATE TABLE IF NOT EXISTS client_3d_previews (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    client_name VARCHAR(190) NOT NULL,
+    model_label VARCHAR(255) NOT NULL,
+    preview_token VARCHAR(64) NOT NULL UNIQUE,
+    model_path VARCHAR(500) NOT NULL,
+    review_date DATE DEFAULT NULL,
+    expires_at DATETIME DEFAULT NULL,
+    notes TEXT DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_client_3d_expires (expires_at),
+    INDEX idx_client_3d_review_date (review_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

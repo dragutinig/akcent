@@ -50,72 +50,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $comments = $repo->listApprovedComments((int) $project['id'], 20);
 $modelUrl = trim((string) ($project['model_path'] ?? ''));
-$modelUrl = $modelUrl !== '' ? (strpos($modelUrl, 'http') === 0 ? $modelUrl : getSiteBaseUrl() . '/' . ltrim($modelUrl, '/')) : '';
+$modelUrl = $modelUrl !== '' ? (strpos($modelUrl, 'http') === 0 ? $modelUrl : getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $modelUrl), '/')) : '';
 $blogUrl = trim((string) ($project['blog_post_url'] ?? ''));
 $blogUrl = $blogUrl !== '' ? (strpos($blogUrl, 'http') === 0 ? $blogUrl : getSiteBaseUrl() . '/' . ltrim($blogUrl, '/')) : '';
 $metaTitle = trim((string) ($project['meta_title'] ?? '')) ?: $project['title'];
 $metaDesc = trim((string) ($project['meta_description'] ?? ''));
 ?>
 <!doctype html>
-<html lang="sr">
+<html class="no-js" lang="sr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?php echo htmlspecialchars($metaTitle, ENT_QUOTES, 'UTF-8'); ?></title>
     <meta name="description" content="<?php echo htmlspecialchars($metaDesc, ENT_QUOTES, 'UTF-8'); ?>">
     <link rel="canonical" href="<?php echo htmlspecialchars(getSiteBaseUrl()); ?>/projekat.php?slug=<?php echo urlencode($project['slug']); ?>">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo htmlspecialchars(getSiteBaseUrl()); ?>/css/style.css">
-    <script src="<?php echo htmlspecialchars(getSiteBaseUrl()); ?>/js/main.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/nav.css">
+    <link rel="stylesheet" href="css/projekti.css">
 </head>
-<body>
+<body class="projects-page">
 <?php include __DIR__ . '/komponente/nav.php'; ?>
-<div class="container py-5">
-    <p><a href="gotovi-projekti.php">← Svi gotovi projekti</a></p>
-    <h1><?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?></h1>
-    <p class="text-muted">Datum: <?php echo htmlspecialchars(date('d.m.Y', strtotime($project['created_at']))); ?></p>
+<div style="height:50px;"></div>
+<main class="projects-shell">
+    <p><a href="nasi-projekti.php">← Svi projekti</a></p>
+    <article class="project-detail">
+        <h1><?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?></h1>
+        <p class="project-date">Datum: <?php echo htmlspecialchars(date('d.m.Y', strtotime($project['created_at']))); ?></p>
+        <?php if (!empty($project['excerpt'])): ?><p><?php echo htmlspecialchars($project['excerpt'], ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>
 
-    <?php if ($modelUrl !== ''): ?>
-      <p><a class="btn btn-dark" target="_blank" rel="noopener" href="<?php echo htmlspecialchars($modelUrl, ENT_QUOTES, 'UTF-8'); ?>">Otvori 3D model u novom prozoru</a></p>
-    <?php endif; ?>
-    <?php if ($blogUrl !== ''): ?>
-      <p><a class="btn btn-outline-secondary" href="<?php echo htmlspecialchars($blogUrl, ENT_QUOTES, 'UTF-8'); ?>">Povezani blog post</a></p>
-    <?php endif; ?>
-
-    <div class="mb-4"><?php echo $project['content']; ?></div>
-
-    <?php if (!empty($project['images'])): ?>
-    <div class="row g-3 mb-4">
-      <?php foreach ($project['images'] as $img): $src = getSiteBaseUrl() . '/' . ltrim($img['image_path'], '/'); ?>
-        <div class="col-md-4">
-          <img src="<?php echo htmlspecialchars($src, ENT_QUOTES, 'UTF-8'); ?>" class="img-fluid rounded" alt="<?php echo htmlspecialchars((string) ($img['alt_text'] ?: $project['title']), ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo htmlspecialchars((string) ($img['title_text'] ?: $project['title']), ENT_QUOTES, 'UTF-8'); ?>">
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <?php if ($modelUrl !== ''): ?><a class="btn btn-dark" target="_blank" rel="noopener" href="<?php echo htmlspecialchars($modelUrl, ENT_QUOTES, 'UTF-8'); ?>">Otvori 3D model</a><?php endif; ?>
+            <?php if ($blogUrl !== ''): ?><a class="btn btn-outline-secondary" href="<?php echo htmlspecialchars($blogUrl, ENT_QUOTES, 'UTF-8'); ?>">Povezani blog post</a><?php endif; ?>
         </div>
-      <?php endforeach; ?>
-    </div>
-    <?php endif; ?>
 
-    <section class="mt-4">
-      <h2 class="h4">Komentari</h2>
-      <?php if ($flash): ?><div class="alert alert-info"><?php echo htmlspecialchars($flash, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
-      <?php foreach ($comments as $c): ?>
-        <div class="border rounded p-2 mb-2">
-          <strong><?php echo htmlspecialchars($c['author_name'], ENT_QUOTES, 'UTF-8'); ?></strong>
-          <small class="text-muted"><?php echo htmlspecialchars(date('d.m.Y H:i', strtotime($c['created_at']))); ?></small>
-          <p class="mb-0"><?php echo nl2br(htmlspecialchars($c['comment_text'], ENT_QUOTES, 'UTF-8')); ?></p>
-        </div>
-      <?php endforeach; ?>
+        <div><?php echo $project['content']; ?></div>
 
-      <form method="post" class="mt-3">
-        <input type="text" name="website" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;">
-        <div class="row g-2">
-          <div class="col-md-6"><input class="form-control" name="name" placeholder="Ime" required></div>
-          <div class="col-md-6"><input class="form-control" type="email" name="email" placeholder="Email (opciono)"></div>
-          <div class="col-12"><textarea class="form-control" name="comment" rows="4" placeholder="Komentar" required></textarea></div>
-          <div class="col-12"><button class="btn btn-primary" type="submit">Pošalji komentar</button></div>
-        </div>
-      </form>
+        <?php if (!empty($project['images'])): ?>
+        <section class="project-gallery">
+            <?php foreach ($project['images'] as $img): $src = getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $img['image_path']), '/'); ?>
+                <img src="<?php echo htmlspecialchars($src, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars((string) ($img['alt_text'] ?: $project['title']), ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo htmlspecialchars((string) ($img['title_text'] ?: $project['title']), ENT_QUOTES, 'UTF-8'); ?>">
+            <?php endforeach; ?>
+        </section>
+        <?php endif; ?>
+    </article>
+
+    <section class="comments-wrap">
+        <h2>Komentari</h2>
+        <?php if ($flash): ?><div class="alert alert-info"><?php echo htmlspecialchars($flash, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
+        <?php foreach ($comments as $c): ?>
+            <div class="comment-item">
+                <strong><?php echo htmlspecialchars($c['author_name'], ENT_QUOTES, 'UTF-8'); ?></strong>
+                <small class="project-date"><?php echo htmlspecialchars(date('d.m.Y H:i', strtotime($c['created_at']))); ?></small>
+                <p class="mb-0"><?php echo nl2br(htmlspecialchars($c['comment_text'], ENT_QUOTES, 'UTF-8')); ?></p>
+            </div>
+        <?php endforeach; ?>
+
+        <form method="post" class="project-detail">
+            <input type="text" name="website" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;">
+            <div class="row g-2">
+                <div class="col-md-6"><input class="form-control" name="name" placeholder="Ime" required></div>
+                <div class="col-md-6"><input class="form-control" type="email" name="email" placeholder="Email (opciono)"></div>
+                <div class="col-12"><textarea class="form-control" name="comment" rows="4" placeholder="Komentar" required></textarea></div>
+                <div class="col-12"><button class="btn btn-primary" type="submit">Pošalji komentar</button></div>
+            </div>
+        </form>
     </section>
-</div>
+</main>
 <?php include __DIR__ . '/komponente/footer.php'; ?>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="js/vendor/modernizr-3.8.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+<script src="js/plugins.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>

@@ -58,7 +58,7 @@ $current = 'dashboard';
                 <?php if ($latestPostId > 0): ?><a class="btn btn-secondary" href="edit_post.php?post_id=<?= $latestPostId; ?>">Poslednji post</a><?php endif; ?>
                 <a class="btn btn-secondary" href="../" target="_blank">Otvori blog</a>
                 <a class="btn btn-secondary" href="<?= admin_esc(getBlogBasePath()); ?>/admin" target="_blank">Admin URL</a>
-                <a class="btn btn-secondary" href="<?= admin_esc(getSiteBaseUrl()); ?>/gotovi-projekti.php" target="_blank">Stranica gotovih projekata</a>
+                <a class="btn btn-secondary" href="<?= admin_esc(getSiteBaseUrl()); ?>/nasi-projekti.php" target="_blank">Stranica Naši projekti</a>
             </section>
 
             <section class="section">

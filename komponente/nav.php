@@ -23,6 +23,7 @@
                  <li><a href="opremanje-stana-po-meri.php">OPREMANJE STANA</a></li>
                  <li><a href="cene.php">Cene kuhinja</a></li>
                  <li><a href="blog/">Blog</a></li>
+                 <li><a href="nasi-projekti.php">Naši projekti</a></li>
                  <li><a href="namestaj-po-meri-galerija.php">Galerija</a></li>
              
                 <li><a href="javascript:void(0)">Ostalo<span class="arrow-down"></span></a>
