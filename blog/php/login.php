@@ -1,5 +1,4 @@
 <?php
-session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -7,11 +6,49 @@ require_once 'Database.php';
 require_once 'User.php';
 require_once 'config.php';
 
+start_secure_session();
+
+$attemptsFile = __DIR__ . '/../data/login_attempts.json';
+if (!is_dir(dirname($attemptsFile))) {
+    mkdir(dirname($attemptsFile), 0777, true);
+}
+
+function login_get_ip()
+{
+    return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'unknown';
+}
+
+function login_attempt_state($attemptsFile, $ip)
+{
+    $raw = file_exists($attemptsFile) ? json_decode(file_get_contents($attemptsFile), true) : [];
+    if (!is_array($raw)) {
+        $raw = [];
+    }
+
+    $now = time();
+    foreach ($raw as $key => $row) {
+        if (!isset($row['expires_at']) || (int) $row['expires_at'] < $now) {
+            unset($raw[$key]);
+        }
+    }
+
+    if (!isset($raw[$ip])) {
+        $raw[$ip] = ['count' => 0, 'blocked_until' => 0, 'expires_at' => $now + 86400];
+    }
+
+    return [$raw, $raw[$ip]];
+}
+
+function login_attempt_save($attemptsFile, $all)
+{
+    file_put_contents($attemptsFile, json_encode($all, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+}
+
 $forceLogin = isset($_GET['force']) && $_GET['force'] === '1';
 if ($forceLogin) {
     session_unset();
     session_destroy();
-    session_start();
+    start_secure_session();
 }
 
 if (!$forceLogin && isset($_SESSION['user_id']) && ($_SESSION['role'] ?? '') === 'admin') {
@@ -20,8 +57,15 @@ if (!$forceLogin && isset($_SESSION['user_id']) && ($_SESSION['role'] ?? '') ===
 }
 
 $error = '';
+$ip = login_get_ip();
+list($attempts, $attemptState) = login_attempt_state($attemptsFile, $ip);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (!empty($attemptState['blocked_until']) && time() < (int) $attemptState['blocked_until']) {
+    $remaining = (int) $attemptState['blocked_until'] - time();
+    $error = 'Previše pokušaja prijave. Pokušaj ponovo za ' . max(1, (int) ceil($remaining / 60)) . ' min.';
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $error === '') {
     $database = new Database();
     $db = $database->connect();
     $user = new User($db);
@@ -32,15 +76,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($user->emailExists()) {
         $user->password_hash = $password;
         if ($user->login()) {
+            session_regenerate_id(true);
             $_SESSION['user_id'] = $user->id;
             $_SESSION['username'] = $user->username;
             $_SESSION['role'] = $user->role;
             $_SESSION['last_activity'] = time();
+            $_SESSION['fingerprint'] = hash('sha256', login_get_ip() . '|' . ($_SERVER['HTTP_USER_AGENT'] ?? ''));
+
+            $attempts[$ip] = ['count' => 0, 'blocked_until' => 0, 'expires_at' => time() + 86400];
+            login_attempt_save($attemptsFile, $attempts);
 
             header('Location: ' . getBlogBasePath() . '/php/dashboard.php');
             exit();
         }
     }
+
+    $attempts[$ip]['count'] = (int) ($attempts[$ip]['count'] ?? 0) + 1;
+    $attempts[$ip]['expires_at'] = time() + 86400;
+    if ($attempts[$ip]['count'] >= 5) {
+        $attempts[$ip]['blocked_until'] = time() + 900;
+        $attempts[$ip]['count'] = 0;
+    }
+    login_attempt_save($attemptsFile, $attempts);
 
     $error = 'Email ili lozinka nisu tačni.';
 }
@@ -67,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <section class="section">
             <div class="section-header"><h2>Prijava</h2></div>
             <div style="padding:14px;">
-                <form method="POST" class="form-grid">
+                <form method="POST" class="form-grid" autocomplete="off">
                     <div class="form-group full">
                         <label for="email">Email</label>
                         <input type="email" id="email" name="email" required>
