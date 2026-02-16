@@ -32,7 +32,7 @@ class Database
         $this->host = $this->getConfigValue($config, 'host', 0, 'localhost');
         $this->username = $this->getConfigValue($config, 'username', 1, 'root');
         $this->password = $this->getConfigValue($config, 'password', 2, '');
-        $this->dbname = $this->getConfigValue($config, 'dbname', 3, 'akcentrs_blogdatabase');
+        $this->dbname = $this->getConfigValue($config, 'dbname', 3, 'akcentrs');
     }
 
     public function connect()
