@@ -20,7 +20,7 @@
 
 
 
-<footer class="text-white text-center text-lg-start">
+<footer class="akcent-site-footer text-white text-center text-lg-start">
 
     <div class="container p-4">
 
