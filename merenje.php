@@ -22,7 +22,7 @@
         content="Uzimate sami mere za kuhinje po meri ili plakar? Pomoći ćemo vam da pravilno uzmete mere prostora i pripremite sve za 3D projektovanje.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="manifest" href="site.webmanifest">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon" href="favicon.ico">
     <!-- Place favicon.ico in the root directory -->
     
      <link rel="canonical" href="https://akcent.rs/merenje.php" />

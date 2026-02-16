@@ -3,7 +3,17 @@
     RewriteEngine On
     RewriteBase /blog/
 
-    # Redirektuj /admin na /blog/php/dashboard.php
+    # Force blog directory index to PHP front page (avoid blank /blog/index.html)
+    DirectoryIndex php/index.php
+
+    # Legacy /php URL-ove preusmeri na čiste URL-ove bez /php
+    RewriteRule ^php/?$ /blog/ [L,R=301]
+    RewriteCond %{THE_REQUEST} \s/+blog/php/index\.php[\s?] [NC]
+    RewriteRule ^php/index\.php$ /blog/ [L,R=301]
+    # Uvek serviraj blog početnu na /blog/
+    RewriteRule ^$ php/index.php [L,QSA]
+
+    # Redirektuj /admin na dashboard
     RewriteRule ^admin$ php/dashboard.php [L,R=302]
 
     # Preusmeravanje za postove: /category/slug/

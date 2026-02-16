@@ -22,7 +22,7 @@
     <link rel="canonical" href="https://akcent.rs/opremanje-stana-po-meri.php" />
 
     <link rel="manifest" href="site.webmanifest">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon" href="favicon.ico">
     <!-- Place favicon.ico in the root directory -->
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -68,7 +68,7 @@
 
                 <div class="brzoBiranje row ">
 
-                    <div class="col-5 col-sm-4"> <a href="proizvoid.php"
+                    <div class="col-5 col-sm-4"> <a href="proizvodi.php"
                             class="button-37 col-12  btn btn-warning btn-lg ">Svi proizvodi</a></div>
                     <div class="col-5 col-sm-4"> <a href="kontakt.php"
                             class="button-37 col-12  btn btn-warning btn-lg ">Kontakt</a></div>

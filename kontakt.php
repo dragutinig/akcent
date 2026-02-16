@@ -50,7 +50,7 @@ function gtag_report_conversion(url) {
     <meta name="description" content="Kontaktirajte nas za kuhinje i plakare po meri. Pronađite sve informacije o našim uslugama i načinima komunikacije.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="manifest" href="site.webmanifest">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon" href="favicon.ico">
     
     <link rel="canonical" href="https://akcent.rs/kontakt.php" />
     

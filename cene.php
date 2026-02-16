@@ -22,7 +22,7 @@
     <meta name="description" content="Kuhinje po meri: Cene bez skrivenih troškova. Cena kuhinja po dužnom metru, avansi, materijali. Pančevo, Beograd, Zemun.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="manifest" href="site.webmanifest">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon" href="favicon.ico">
     <!-- Place favicon.ico in the root directory -->
     
      <link rel="canonical" href="https://akcent.rs/cene.php" />

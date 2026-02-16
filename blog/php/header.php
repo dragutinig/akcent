@@ -21,7 +21,7 @@ if (!$categories) {
     </a>
          <!-- Centar: My Blog -->
         <div class="logo">
-            <p><a href="/blog/php">Akcent blog</a></p>
+            <p><a href="/blog/">Akcent blog</a></p>
         </div>
      <nav>
     <a class="dropdown-toggle">

@@ -1,16 +1,25 @@
 <?php
-require_once 'db_config.php';
+require_once 'Database.php';
 
-$searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
+$db = new Database();
+$conn = $db->connect();
 
-$searchQuery = "SELECT posts.id, posts.title, posts.slug, posts.content
+$searchTerm = isset($_GET['search']) ? trim($_GET['search']) : '';
+$searchLike = '%' . $searchTerm . '%';
+
+$searchQuery = "SELECT posts.id, posts.title, posts.slug, posts.content, categories.slug AS category_slug
                 FROM posts
+                JOIN categories ON posts.category_id = categories.id
                 WHERE posts.status = 'published' AND (
-                    posts.title LIKE '%$searchTerm%' OR
-                    posts.content LIKE '%$searchTerm%'
-                ) ORDER BY posts.published_at DESC";
+                    posts.title LIKE ? OR
+                    posts.content LIKE ?
+                )
+                ORDER BY posts.published_at DESC";
 
-$searchResults = mysqli_query($conn, $searchQuery);
+$stmt = $conn->prepare($searchQuery);
+$stmt->bind_param('ss', $searchLike, $searchLike);
+$stmt->execute();
+$searchResults = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -20,7 +29,7 @@ $searchResults = mysqli_query($conn, $searchQuery);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pretraga - Blog</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/blog/css/style.css">
 </head>
 
 <body>
@@ -30,9 +39,7 @@ $searchResults = mysqli_query($conn, $searchQuery);
         </div>
         <nav>
             <ul>
-                <li><a href="index.php">Početna</a></li>
-                <li><a href="#">O nama</a></li>
-                <li><a href="#">Kontakt</a></li>
+                <li><a href="/blog/">Početna</a></li>
             </ul>
             <form action="search.php" method="GET" class="search-form">
                 <input type="text" name="search" placeholder="Pretraga..." value="<?php echo htmlspecialchars($searchTerm); ?>">
@@ -43,13 +50,13 @@ $searchResults = mysqli_query($conn, $searchQuery);
 
     <main>
         <div class="posts">
-            <h2>Rezultati Pretrage</h2>
-            <?php if (mysqli_num_rows($searchResults) > 0): ?>
-                <?php while ($post = mysqli_fetch_assoc($searchResults)): ?>
+            <h2>Rezultati pretrage</h2>
+            <?php if ($searchResults->num_rows > 0): ?>
+                <?php while ($post = $searchResults->fetch_assoc()): ?>
                     <div class="post">
-                        <h3><a href="post.php?slug=<?php echo $post['slug']; ?>"><?php echo $post['title']; ?></a></h3>
-                        <p><?php echo substr($post['content'], 0, 200) . '...'; ?></p>
-                        <p><a href="post.php?slug=<?php echo $post['slug']; ?>">Pročitaj više</a></p>
+                        <h3><?php echo htmlspecialchars($post['title']); ?></h3>
+                        <p><?php echo substr(strip_tags($post['content']), 0, 200) . '...'; ?></p>
+                        <p><a href="/blog/<?php echo $post['category_slug']; ?>/<?php echo $post['slug']; ?>">Pročitaj više</a></p>
                     </div>
                 <?php endwhile; ?>
             <?php else: ?>

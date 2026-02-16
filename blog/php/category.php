@@ -105,8 +105,6 @@ if (!$posts) {
                                 <p><?php echo strip_tags(substr($post['content'], 0, 300)); ?>...</p>
                             </div>
                         </a>
-                        <a href="/blog/<?php echo $post['category_slug']; ?>/<?php echo $post['slug']; ?>"
-                            class="read-more">Read more</a>
                     </div>
                 <?php endwhile; ?>
             <?php else: ?>

@@ -39,7 +39,7 @@ if (!$posts) {
     
     <title>Inspiracija, trendovi i prakticni saveti u enterijeru</title>
      <meta name="description" content="Saveti i inspiracija za uređenje doma – od izbora nameštaja do najnovijih trendova u enterijeru. Kreirajte funkcionalan prostor sa stilom">
-     <link rel="canonical" href="https://akcent.rs/blog/php/" />
+     <link rel="canonical" href="https://akcent.rs/blog/" />
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -59,7 +59,7 @@ if (!$posts) {
   "@context": "https://schema.org",
   "@type": "Blog",
   "name": "Akcent Blog",
-  "url": "https://akcent.rs/blog/php/",
+  "url": "https://akcent.rs/blog/",
   "description": "Akcent Blog donosi savete, ideje i inspiraciju za uređenje doma – od izbora nameštaja do najnovijih trendova u enterijeru.",
   "publisher": {
     "@type": "Organization",
@@ -100,7 +100,6 @@ if (!$posts) {
                         <p><?php echo strip_tags(substr($post['content'], 0, 300)); ?></p>
                     </div>
                 </a>
-                <a href="/blog/<?php echo $post['category_slug']; ?>/<?php echo $post['slug']; ?>" class="read-more">Read more</a>
             </div>
             <?php endwhile; ?>
         </div>
