@@ -30,13 +30,9 @@ if ($modelPath === '') {
     if (is_file($absolutePath)) {
         $modelUrl = getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $modelPath), '/');
     } else {
-        $modelError = '3D fajl nije pronađen na serveru. Molimo vas da nas kontaktirate kako bismo odmah poslali ispravan link.';
+        $modelError = '3D fajl nije pronađen na serveru.';
     }
 }
-
-$createdAt = strtotime((string) ($project['created_at'] ?? ''));
-$createdAtLabel = $createdAt ? date('d.m.Y H:i', $createdAt) : 'Nepoznato';
-$note = trim((string) ($project['excerpt'] ?? ''));
 ?>
 <!doctype html>
 <html class="no-js" lang="sr">
@@ -54,27 +50,15 @@ $note = trim((string) ($project['excerpt'] ?? ''));
 <body class="projects-page">
 <?php include __DIR__ . '/komponente/nav.php'; ?>
 <div style="height:50px;"></div>
-<main class="project-3d-shell">
-    <p><a href="projekat.php?slug=<?php echo urlencode((string) $project['slug']); ?>">← Nazad na projekat</a></p>
-
-    <section class="project-3d-meta">
-        <h1 class="h4 mb-3"><?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?></h1>
-        <p><strong>Uploadovan:</strong> <?php echo htmlspecialchars($createdAtLabel, ENT_QUOTES, 'UTF-8'); ?></p>
-        <p><strong>Napomena:</strong> <?php echo htmlspecialchars($note !== '' ? $note : 'Za sva pitanja i nejasnoće slobodno nas kontaktirajte.', ENT_QUOTES, 'UTF-8'); ?></p>
-        <p class="project-3d-help"><strong>Kontakt:</strong> Za sva pitanja ili nejasnoće pišite na <a href="mailto:akcentnamestaj@gmail.com">akcentnamestaj@gmail.com</a> ili pozovite <a href="tel:+381616485508">+381 61 648 8508</a>.</p>
-    </section>
-
-    <section class="project-3d-frame">
-        <?php if ($modelUrl !== ''): ?>
-            <iframe src="<?php echo htmlspecialchars($modelUrl, ENT_QUOTES, 'UTF-8'); ?>" title="3D model <?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>"></iframe>
-        <?php else: ?>
-            <div class="p-4">
-                <div class="alert alert-warning mb-0"><?php echo htmlspecialchars($modelError, ENT_QUOTES, 'UTF-8'); ?></div>
-            </div>
-        <?php endif; ?>
-    </section>
+<main class="project-3d-only-shell">
+    <?php if ($modelUrl !== ''): ?>
+        <iframe src="<?php echo htmlspecialchars($modelUrl, ENT_QUOTES, 'UTF-8'); ?>" title="3D model <?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>"></iframe>
+    <?php else: ?>
+        <div class="container py-4">
+            <div class="alert alert-warning mb-0"><?php echo htmlspecialchars($modelError, ENT_QUOTES, 'UTF-8'); ?></div>
+        </div>
+    <?php endif; ?>
 </main>
-<?php include __DIR__ . '/komponente/footer.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 </body>
 </html>

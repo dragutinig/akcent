@@ -28,3 +28,6 @@
 .akcent-site-footer .table,
 .akcent-site-footer .table td,
 .akcent-site-footer .table th { color:#fff !important; border-color: rgba(255,255,255,.2); }
+
+.project-3d-only-shell { height: calc(100vh - 50px); background:#fff; }
+.project-3d-only-shell iframe { width:100%; height:100%; border:0; display:block; }
