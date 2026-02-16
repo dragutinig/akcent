@@ -1,34 +1,26 @@
 <?php
-
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-
 require_once 'Database.php';
 require_once 'config.php';
 
 start_secure_session();
 
-$requestUri = $_SERVER['REQUEST_URI'];
-
-// Ekstrakcija "category" i "slug"
-if (isset($_GET['category']) && isset($_GET['slug'])) {
-    $categorySlug = $_GET['category'];
-    $postSlug = $_GET['slug'];
-} elseif (preg_match('#(?:^|/)blog/([^/]+)/([^/]+)/?$#', parse_url($requestUri, PHP_URL_PATH), $matches)) {
+if (isset($_GET['category'], $_GET['slug'])) {
+    $categorySlug = trim((string) $_GET['category']);
+    $postSlug = trim((string) $_GET['slug']);
+} elseif (preg_match('#(?:^|/)blog/([^/]+)/([^/]+)/?$#', parse_url($requestUri, PHP_URL_PATH) ?: '', $matches)) {
     $categorySlug = $matches[1];
     $postSlug = $matches[2];
 } else {
-    die("Invalid URL format.");
+    http_response_code(400);
+    exit('Invalid URL format.');
 }
 
 $db = new Database();
 $conn = $db->connect();
 
 if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
+    http_response_code(500);
+    exit('Connection failed.');
 }
 
 // Upit za postove
@@ -45,10 +37,59 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    die("Post not found.");
+    http_response_code(404);
+    exit('Post not found.');
 }
 
 $post = $result->fetch_assoc();
+$postId = (int) $post['id'];
+
+$flash = '';
+if ($hasPostComments && $_SERVER['REQUEST_METHOD'] === 'POST' && (($_POST['action'] ?? '') === 'add_comment')) {
+    start_secure_session();
+    $name = trim((string) ($_POST['name'] ?? ''));
+    $email = trim((string) ($_POST['email'] ?? ''));
+    $comment = trim((string) ($_POST['comment'] ?? ''));
+    $website = trim((string) ($_POST['website'] ?? ''));
+
+    if ($website !== '') {
+        $flash = 'Komentar nije sačuvan.';
+    } elseif ($name === '' || $comment === '') {
+        $flash = 'Popuni ime i komentar.';
+    } else {
+        $rateKey = 'post_comment_' . $postId;
+        $last = (int) ($_SESSION[$rateKey] ?? 0);
+        if (time() - $last < 20) {
+            $flash = 'Sačekaj malo pre narednog komentara.';
+        } else {
+            $insert = $conn->prepare('INSERT INTO post_comments (post_id, author_name, author_email, comment_text, status, ip_address, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?)');
+            $status = 'approved';
+            $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+            $ua = mb_substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255);
+            $author = mb_substr($name, 0, 120);
+            $authorEmail = mb_substr($email, 0, 190);
+            $commentText = mb_substr($comment, 0, 1500);
+            $insert->bind_param('issssss', $postId, $author, $authorEmail, $commentText, $status, $ip, $ua);
+            $insert->execute();
+            $_SESSION[$rateKey] = time();
+            $flash = 'Komentar je objavljen.';
+        }
+    }
+}
+
+$relatedStmt = $conn->prepare("SELECT posts.title, posts.slug, posts.featured_image, posts.content, categories.slug AS category_slug
+    FROM posts
+    JOIN categories ON posts.category_id = categories.id
+    WHERE posts.status = 'published' AND categories.slug = ? AND posts.slug <> ?
+    ORDER BY posts.published_at DESC
+    LIMIT 3");
+$relatedStmt->bind_param('ss', $categorySlug, $postSlug);
+$relatedStmt->execute();
+$relatedResult = $relatedStmt->get_result();
+$relatedPosts = [];
+while ($row = $relatedResult->fetch_assoc()) {
+    $relatedPosts[] = $row;
+}
 
 
 $relatedStmt = $conn->prepare("SELECT posts.title, posts.slug, categories.slug AS category_slug
@@ -70,13 +111,11 @@ $tagsQuery = "
     SELECT tags.name
     FROM tags
     JOIN posttags ON tags.id = posttags.tag_id
-    WHERE posttags.post_id = (SELECT id FROM posts WHERE slug = ?)";
-
+    WHERE posttags.post_id = ?";
 $tagsStmt = $conn->prepare($tagsQuery);
-$tagsStmt->bind_param('s', $postSlug);
+$tagsStmt->bind_param('i', $postId);
 $tagsStmt->execute();
 $tagsResult = $tagsStmt->get_result();
-
 $tags = [];
 while ($tag = $tagsResult->fetch_assoc()) {
     $tags[] = $tag['name'];
@@ -134,42 +173,27 @@ while ($row = $resCommentList->fetch_assoc()) {
     $postComments[] = $row;
 }
 
-$relativePath = $post['featured_image'];
-$absolutePath = resolveImageUrl($relativePath);
+$absolutePath = resolveImageUrl((string) $post['featured_image']);
 ?>
-
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="sr">
-
 <head>
-     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-     integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-     <!-- Google tag (gtag.js) -->
-     <script async src="https://www.googletagmanager.com/gtag/js?id=G-HDLXHWERJK"></script>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-         <script>
-         window.dataLayer = window.dataLayer || [];
-         function gtag(){dataLayer.push(arguments);}
-         gtag('js', new Date());
-         gtag('config', 'G-HDLXHWERJK');
-        </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HDLXHWERJK"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);} 
+        gtag('js', new Date());
+        gtag('config', 'G-HDLXHWERJK');
+    </script>
     <meta charset="UTF-8">
     <title><?php echo htmlspecialchars($post['meta_title']); ?></title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/share.css">
     <link rel="stylesheet" href="../css/template.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Canonical Link -->
     <link rel="canonical" href="<?php echo htmlspecialchars(getBlogBaseUrl()); ?>/<?php echo htmlspecialchars($categorySlug); ?>/<?php echo htmlspecialchars($postSlug); ?>" />
-    <!-- Meta Description -->
     <meta name="description" content="<?php echo htmlspecialchars($post['meta_description']); ?>">
-    <!-- Meta Keywords (tags) -->
     <meta name="keywords" content="<?php echo htmlspecialchars($tagsString); ?>">
 <meta property="og:title" content="<?php echo htmlspecialchars($post['meta_title']); ?>">
 <meta property="og:description" content="<?php echo htmlspecialchars($post['meta_description']); ?>">
@@ -186,17 +210,26 @@ $absolutePath = resolveImageUrl($relativePath);
          </style>
 
 </head>
-
 <body>
-    <!-- Header -->
-    <?php include 'header.php'; ?>
+<?php include 'header.php'; ?>
+<article>
+    <h1><?php echo htmlspecialchars($post['title']); ?></h1>
+    <p class="published-at"><?php echo date('F j, Y', strtotime($post['published_at'])); ?></p>
+    <div class="post-content"><?php echo $post['content']; ?></div>
 
-    <!-- Post Content -->
-    <article>
-        <h1><?php echo htmlspecialchars($post['title']); ?></h1>
-        <p class="published-at"><?php echo date("F j, Y", strtotime($post['published_at'])); ?></p>
-        <div class="post-content">
-            <?php echo $post['content']; ?>
+    <?php if (!empty($relatedPosts)): ?>
+    <section style="margin-top:26px; border-top:1px solid #e5e7eb; padding-top:20px;">
+        <h2 style="font-size:1.3rem; margin-bottom:10px;">Preporučeni blogovi</h2>
+        <div class="recommended-grid">
+            <?php foreach ($relatedPosts as $rp): ?>
+                <a class="recommended-card" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/<?php echo htmlspecialchars($rp['category_slug']); ?>/<?php echo htmlspecialchars($rp['slug']); ?>">
+                    <img src="<?php echo htmlspecialchars(resolveImageUrl((string) ($rp['featured_image'] ?? ''))); ?>" alt="<?php echo htmlspecialchars($rp['title']); ?>">
+                    <div class="body">
+                        <h3><?php echo htmlspecialchars($rp['title']); ?></h3>
+                        <p><?php echo htmlspecialchars(mb_substr(trim(strip_tags((string) $rp['content'])), 0, 110)); ?>...</p>
+                    </div>
+                </a>
+            <?php endforeach; ?>
         </div>
         
         
@@ -259,11 +292,5 @@ $absolutePath = resolveImageUrl($relativePath);
 
 
 </body>
-
 </html>
-
-<?php
-// Zatvaranje konekcije
-$conn->close();
-?>
-
+<?php $conn->close(); ?>
