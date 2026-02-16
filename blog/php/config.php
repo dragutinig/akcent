@@ -63,11 +63,13 @@ function getDbConfig(): array
 
     $defaultUser = $isProductionHost ? 'akcentrs_blogdatabase' : 'root';
     $defaultPassword = $isProductionHost ? 'Dragigagi1' : '';
+    $defaultDbName = $isProductionHost ? 'akcentrs_blogdatabase' : 'akcentrs';
 
     return [
         'host' => getEnvOrDefault('AKCENT_DB_HOST', 'localhost'),
         'username' => getEnvOrDefault('AKCENT_DB_USER', $defaultUser),
         'password' => getEnvOrDefault('AKCENT_DB_PASS', $defaultPassword),
+        'dbname' => getEnvOrDefault('AKCENT_DB_NAME', $defaultDbName),
         'dbname' => getEnvOrDefault('AKCENT_DB_NAME', 'akcentrs_blogdatabase'),
     ];
 }
