@@ -70,5 +70,6 @@ function getDbConfig(): array
         'username' => getEnvOrDefault('AKCENT_DB_USER', $defaultUser),
         'password' => getEnvOrDefault('AKCENT_DB_PASS', $defaultPassword),
         'dbname' => getEnvOrDefault('AKCENT_DB_NAME', $defaultDbName),
+        'dbname' => getEnvOrDefault('AKCENT_DB_NAME', 'akcentrs_blogdatabase'),
     ];
 }

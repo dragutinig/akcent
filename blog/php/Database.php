@@ -26,6 +26,9 @@ class Database
     public function __construct()
     {
         $config = getDbConfig();
+
+        // Defensive fallback: podržava i slučaj kada config dođe kao numerički niz
+        // ili kada nedostaju očekivani ključevi (npr. loš merge na lokalu).
         $this->host = $this->getConfigValue($config, 'host', 0, 'localhost');
         $this->username = $this->getConfigValue($config, 'username', 1, 'root');
         $this->password = $this->getConfigValue($config, 'password', 2, '');
