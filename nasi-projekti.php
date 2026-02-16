@@ -7,6 +7,21 @@ $db = (new Database())->connect();
 $repo = new ProjectRepository($db);
 $repo->ensureSchema();
 $projects = $repo->listProjects('published');
+
+$months = [];
+$years = [];
+foreach ($projects as $p) {
+    $timestamp = strtotime((string) $p['created_at']);
+    if ($timestamp === false) {
+        continue;
+    }
+    $m = date('m', $timestamp);
+    $y = date('Y', $timestamp);
+    $months[$m] = date('F', mktime(0, 0, 0, (int) $m, 1));
+    $years[$y] = $y;
+}
+krsort($years);
+ksort($months);
 ?>
 <!doctype html>
 <html class="no-js" lang="sr">
@@ -29,12 +44,28 @@ $projects = $repo->listProjects('published');
     <h1 class="projects-title">Naši projekti</h1>
     <p class="projects-subtitle">Tabela / kartice sa projektima: slika, naslov i datum.</p>
 
+    <div class="projects-filter">
+        <select id="project-month" class="form-select">
+            <option value="">Svi meseci</option>
+            <?php foreach ($months as $monthNumber => $monthName): ?>
+                <option value="<?php echo htmlspecialchars($monthNumber, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($monthName, ENT_QUOTES, 'UTF-8'); ?></option>
+            <?php endforeach; ?>
+        </select>
+        <select id="project-year" class="form-select">
+            <option value="">Sve godine</option>
+            <?php foreach ($years as $year): ?>
+                <option value="<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8'); ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
     <section class="projects-grid">
         <?php foreach ($projects as $project):
             $cover = $project['images'][0]['image_path'] ?? '';
             $coverUrl = $cover !== '' ? getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $cover), '/') : '';
+            $ts = strtotime((string) $project['created_at']);
         ?>
-        <article class="project-card">
+        <article class="project-card" data-month="<?php echo htmlspecialchars($ts ? date('m', $ts) : '', ENT_QUOTES, 'UTF-8'); ?>" data-year="<?php echo htmlspecialchars($ts ? date('Y', $ts) : '', ENT_QUOTES, 'UTF-8'); ?>">
             <?php if ($coverUrl !== ''): ?>
                 <img src="<?php echo htmlspecialchars($coverUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>">
             <?php endif; ?>
@@ -54,5 +85,23 @@ $projects = $repo->listProjects('published');
 <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
 <script src="js/plugins.js"></script>
 <script src="js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const month = document.getElementById('project-month');
+    const year = document.getElementById('project-year');
+    const cards = document.querySelectorAll('.project-card');
+
+    function filterProjects() {
+        cards.forEach(function (card) {
+            const monthOk = !month.value || card.dataset.month === month.value;
+            const yearOk = !year.value || card.dataset.year === year.value;
+            card.style.display = monthOk && yearOk ? '' : 'none';
+        });
+    }
+
+    month.addEventListener('change', filterProjects);
+    year.addEventListener('change', filterProjects);
+});
+</script>
 </body>
 </html>

@@ -55,6 +55,7 @@ $blogUrl = trim((string) ($project['blog_post_url'] ?? ''));
 $blogUrl = $blogUrl !== '' ? (strpos($blogUrl, 'http') === 0 ? $blogUrl : getSiteBaseUrl() . '/' . ltrim($blogUrl, '/')) : '';
 $metaTitle = trim((string) ($project['meta_title'] ?? '')) ?: $project['title'];
 $metaDesc = trim((string) ($project['meta_description'] ?? ''));
+$project3dUrl = 'projekat-3d.php?slug=' . urlencode((string) $project['slug']);
 ?>
 <!doctype html>
 <html class="no-js" lang="sr">
@@ -81,7 +82,7 @@ $metaDesc = trim((string) ($project['meta_description'] ?? ''));
         <?php if (!empty($project['excerpt'])): ?><p><?php echo htmlspecialchars($project['excerpt'], ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>
 
         <div class="d-flex flex-wrap gap-2 mb-3">
-            <?php if ($modelUrl !== ''): ?><a class="btn btn-dark" target="_blank" rel="noopener" href="<?php echo htmlspecialchars($modelUrl, ENT_QUOTES, 'UTF-8'); ?>">Otvori 3D model</a><?php endif; ?>
+            <?php if ($modelUrl !== ''): ?><a class="btn btn-dark" href="<?php echo htmlspecialchars($project3dUrl, ENT_QUOTES, 'UTF-8'); ?>">Otvori 3D model</a><?php endif; ?>
             <?php if ($blogUrl !== ''): ?><a class="btn btn-outline-secondary" href="<?php echo htmlspecialchars($blogUrl, ENT_QUOTES, 'UTF-8'); ?>">Povezani blog post</a><?php endif; ?>
         </div>
 
