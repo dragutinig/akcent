@@ -126,7 +126,7 @@ usort($images, fn($a,$b)=>strcmp($a['rel'],$b['rel']));
 
 $current = 'media';
 ?>
-<!DOCTYPE html><html lang="sr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Media manager</title><link rel="stylesheet" href="../css/admin.css"></head>
+<!DOCTYPE html><html lang="sr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Media manager</title><link rel="stylesheet" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/css/admin.css"></head>
 <body><main class="admin-shell"><?php include 'admin_sidebar.php'; ?><section class="admin-content">
 <section class="topbar"><div><h1>Media manager</h1><p class="muted">Upravljanje svim slikama: alt/title, zamena, brisanje, upload i resize.</p></div></section>
 <?php if ($message): ?><div class="alert alert-success"><?= admin_esc($message); ?></div><?php endif; ?>

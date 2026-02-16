@@ -5,9 +5,17 @@ ini_set('display_errors', 1);
 
 require_once 'Database.php';
 require_once 'User.php';
+require_once 'config.php';
 
-if (isset($_SESSION['user_id']) && ($_SESSION['role'] ?? '') === 'admin') {
-    header('Location: dashboard.php');
+$forceLogin = isset($_GET['force']) && $_GET['force'] === '1';
+if ($forceLogin) {
+    session_unset();
+    session_destroy();
+    session_start();
+}
+
+if (!$forceLogin && isset($_SESSION['user_id']) && ($_SESSION['role'] ?? '') === 'admin') {
+    header('Location: ' . getBlogBasePath() . '/php/dashboard.php');
     exit();
 }
 
@@ -29,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['role'] = $user->role;
             $_SESSION['last_activity'] = time();
 
-            header('Location: dashboard.php');
+            header('Location: ' . getBlogBasePath() . '/php/dashboard.php');
             exit();
         }
     }
@@ -43,10 +51,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin prijava | Akcent Blog</title>
-    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/css/admin.css">
 </head>
 <body>
-    <main class="admin-wrap" style="max-width:640px; margin-top:80px;">
+    <main class="login-wrap">
         <section class="topbar" style="display:block;">
             <h1>Akcent Blog Admin</h1>
             <p class="muted" style="margin-top:6px;">Prijavi se za upravljanje postovima, kategorijama i komentarima.</p>

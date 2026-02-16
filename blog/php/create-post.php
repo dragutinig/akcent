@@ -3,6 +3,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once 'Database.php';
+require_once 'config.php';
 require_once 'admin_bootstrap.php';
 
 function generate_slug(string $text): string
@@ -112,7 +113,7 @@ if ($result) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kreiranje novog posta</title>
-    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/css/admin.css">
     <script src="../js/tinymce/tinymce.min.js"></script>
     <script>
         tinymce.init({

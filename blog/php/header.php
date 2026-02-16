@@ -28,7 +28,7 @@ if (!$categories) {
             <p><a href="<?php echo htmlspecialchars($blogBasePath); ?>/">Akcent blog</a></p>
         </div>
         <nav>
-            <a class="admin-entry-link" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/<?php echo (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') ? 'admin' : 'php/login.php'; ?>" title="Admin ulaz" aria-label="Admin ulaz">⚙</a>
+            <a class="admin-entry-link" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/php/login.php?force=1" title="Admin ulaz" aria-label="Admin ulaz">⚙</a>
             <button class="dropdown-toggle" type="button" aria-expanded="false" aria-label="Prikaži kategorije">
                 <span class="menu-text">Kategorije</span>
                 <span class="hamburger-icon" style="display: none;">&#9776;</span>

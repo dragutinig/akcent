@@ -1,5 +1,6 @@
 <?php
 require_once 'Database.php';
+require_once 'config.php';
 require_once 'admin_bootstrap.php';
 
 $database = new Database();
@@ -86,7 +87,7 @@ $current = 'categories';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kategorije | Akcent Blog Admin</title>
-    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/css/admin.css">
 </head>
 
 <body>

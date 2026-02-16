@@ -1,4 +1,5 @@
 <?php
+require_once 'config.php';
 require_once 'admin_bootstrap.php';
 
 $dataFile = __DIR__ . '/../data/projects.json';
@@ -48,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $current = 'projects';
 ?>
-<!DOCTYPE html><html lang="sr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Projekti</title><link rel="stylesheet" href="../css/admin.css"></head>
+<!DOCTYPE html><html lang="sr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Projekti</title><link rel="stylesheet" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/css/admin.css"></head>
 <body><main class="admin-shell"><?php include 'admin_sidebar.php'; ?><section class="admin-content">
 <section class="topbar"><div><h1>Projekti (3D + Realizacija + Blog)</h1><p class="muted">Kreiraj završene projekte: 3D model URL, realne slike i povezani blog post.</p></div></section>
 <?php if ($message): ?><div class="alert alert-success"><?= admin_esc($message); ?></div><?php endif; ?>
