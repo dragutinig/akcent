@@ -49,6 +49,21 @@ if ($result->num_rows === 0) {
 
 $post = $result->fetch_assoc();
 
+
+$relatedStmt = $conn->prepare("SELECT posts.title, posts.slug, categories.slug AS category_slug
+    FROM posts
+    JOIN categories ON posts.category_id = categories.id
+    WHERE posts.status = 'published' AND categories.slug = ? AND posts.slug <> ?
+    ORDER BY posts.published_at DESC
+    LIMIT 3");
+$relatedStmt->bind_param('ss', $categorySlug, $postSlug);
+$relatedStmt->execute();
+$relatedResult = $relatedStmt->get_result();
+$relatedPosts = [];
+while ($row = $relatedResult->fetch_assoc()) {
+    $relatedPosts[] = $row;
+}
+
 // Upit za tagove povezane sa postom
 $tagsQuery = "
     SELECT tags.name
@@ -111,8 +126,8 @@ $absolutePath = resolveImageUrl($relativePath);
 <meta property="og:url" content="<?php echo htmlspecialchars(getBlogBaseUrl() . "/" . $categorySlug . "/" . $postSlug); ?>">
 <meta name="twitter:card" content="summary_large_image">
 
-    <script src="../js/share.js"></script>
-    <script src="../js/main.js"></script>
+    <script src="<?php echo htmlspecialchars(getBlogBasePath()); ?>/js/share.js"></script>
+    <script src="<?php echo htmlspecialchars(getBlogBasePath()); ?>/js/main.js"></script>
          <style>
              footer {
                background-color: black;
@@ -134,11 +149,19 @@ $absolutePath = resolveImageUrl($relativePath);
         </div>
         
         
+                    <?php if (!empty($relatedPosts)): ?>
+                    <section style="margin-top:26px; border-top:1px solid #e5e7eb; padding-top:20px;">
+                        <h2 style="font-size:1.3rem; margin-bottom:10px;">Pročitaj i ovo</h2>
+                        <ul>
+                            <?php foreach ($relatedPosts as $rp): ?>
+                                <li><a href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/<?php echo htmlspecialchars($rp['category_slug']); ?>/<?php echo htmlspecialchars($rp['slug']); ?>"><?php echo htmlspecialchars($rp['title']); ?></a></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </section>
+                    <?php endif; ?>
+
                     <div class="col-5 col-sm-4"> <a href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/"
                             class="button-37 col-12  btn btn-secondary btn-lg" style="color:#fff !important; font-size:1rem; margin-top:20px">Nazad na blog</a></div>
-                
-                
-                
     </article>
 
     <!-- Footer -->
