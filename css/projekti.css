@@ -3,6 +3,8 @@
 .projects-title { margin: 20px 0 8px; font-size: 2rem; }
 .projects-subtitle { color:#4b5563; margin-bottom:20px; }
 .projects-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:18px; }
+.projects-filter { display:flex; gap:10px; flex-wrap:wrap; margin: 0 0 18px; }
+.projects-filter select { min-width: 180px; }
 .project-card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,.06); display:flex; flex-direction:column; }
 .project-card img { width:100%; height:210px; object-fit:cover; }
 .project-card-content { padding:14px; display:flex; flex-direction:column; gap:10px; height:100%; }
@@ -14,3 +16,15 @@
 .project-gallery img { width:100%; height:180px; object-fit:cover; border-radius:10px; }
 .comments-wrap { margin-top:22px; }
 .comment-item { border:1px solid #e5e7eb; border-radius:8px; padding:10px; margin-bottom:8px; background:#fff; }
+
+.project-3d-shell { max-width: 1180px; margin: 0 auto; padding: 24px 16px 48px; }
+.project-3d-meta { background:#ffffff; border:1px solid #e5e7eb; border-radius:14px; padding:16px; margin-bottom:12px; }
+.project-3d-meta p { margin:0 0 8px; color:#334155; }
+.project-3d-help { margin:0; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px; }
+.project-3d-frame { border:1px solid #e5e7eb; border-radius:14px; overflow:hidden; background:#fff; min-height:70vh; }
+.project-3d-frame iframe { width:100%; min-height:70vh; border:0; }
+
+.akcent-site-footer { background:#222529; color:#fff; }
+.akcent-site-footer .table,
+.akcent-site-footer .table td,
+.akcent-site-footer .table th { color:#fff !important; border-color: rgba(255,255,255,.2); }
