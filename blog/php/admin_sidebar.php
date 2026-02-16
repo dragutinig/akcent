@@ -7,6 +7,7 @@ $menu = [
     'categories' => ['label' => 'Kategorije', 'href' => $base . '/categories.php'],
     'media' => ['label' => 'Media manager', 'href' => $base . '/media.php'],
     'projects' => ['label' => 'Projekti', 'href' => $base . '/projects.php'],
+    'preview3d' => ['label' => 'Preview 3D', 'href' => $base . '/client_3d_models.php'],
 ];
 ?>
 <aside class="admin-sidebar">
