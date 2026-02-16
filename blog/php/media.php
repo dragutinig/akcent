@@ -18,17 +18,59 @@ $allowedRoots = [
 ];
 $allowedRoots = array_filter($allowedRoots);
 
-function rel_from_root(string $path): string {
+function rel_from_root($path)
+{
     $root = realpath(__DIR__ . '/../..');
     return ltrim(str_replace($root, '', $path), DIRECTORY_SEPARATOR);
 }
 
-function is_allowed_path(string $path, array $roots): bool {
+function is_allowed_path($path, $roots)
+{
     $real = realpath($path);
-    if ($real === false) return false;
-    foreach ($roots as $root) {
-        if (strpos($real, $root) === 0) return true;
+    if ($real === false) {
+        return false;
     }
+
+    foreach ($roots as $root) {
+        if (strpos($real, $root) === 0) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function create_image_resource($targetAbs, $type)
+{
+    if ($type === IMAGETYPE_JPEG) {
+        return imagecreatefromjpeg($targetAbs);
+    }
+
+    if ($type === IMAGETYPE_PNG) {
+        return imagecreatefrompng($targetAbs);
+    }
+
+    if ($type === IMAGETYPE_WEBP && function_exists('imagecreatefromwebp')) {
+        return imagecreatefromwebp($targetAbs);
+    }
+
+    return null;
+}
+
+function save_image_resource($dst, $targetAbs, $type)
+{
+    if ($type === IMAGETYPE_JPEG) {
+        return imagejpeg($dst, $targetAbs, 85);
+    }
+
+    if ($type === IMAGETYPE_PNG) {
+        return imagepng($dst, $targetAbs, 6);
+    }
+
+    if ($type === IMAGETYPE_WEBP && function_exists('imagewebp')) {
+        return imagewebp($dst, $targetAbs, 85);
+    }
+
     return false;
 }
 
@@ -36,14 +78,14 @@ $message = '';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
-    $targetRel = trim($_POST['target'] ?? '');
+    $action = isset($_POST['action']) ? $_POST['action'] : '';
+    $targetRel = trim(isset($_POST['target']) ? $_POST['target'] : '');
     $targetAbs = realpath(__DIR__ . '/../../' . $targetRel);
 
     if ($action === 'save_meta' && $targetAbs && is_allowed_path($targetAbs, $allowedRoots)) {
         $imageMeta[$targetRel] = [
-            'alt' => trim($_POST['alt'] ?? ''),
-            'title' => trim($_POST['title'] ?? ''),
+            'alt' => trim(isset($_POST['alt']) ? $_POST['alt'] : ''),
+            'title' => trim(isset($_POST['title']) ? $_POST['title'] : ''),
         ];
         file_put_contents($metaFile, json_encode($imageMeta, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         $message = 'Meta podaci slike su sačuvani.';
@@ -68,30 +110,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'resize_image' && $targetAbs && is_allowed_path($targetAbs, $allowedRoots) && is_file($targetAbs)) {
-        $w = (int) ($_POST['width'] ?? 0);
-        $h = (int) ($_POST['height'] ?? 0);
+        $w = (int) (isset($_POST['width']) ? $_POST['width'] : 0);
+        $h = (int) (isset($_POST['height']) ? $_POST['height'] : 0);
+
         if ($w > 0 && $h > 0 && extension_loaded('gd')) {
             $info = getimagesize($targetAbs);
             if ($info) {
-                [$ow, $oh, $type] = $info;
-                $src = match ($type) {
-                    IMAGETYPE_JPEG => imagecreatefromjpeg($targetAbs),
-                    IMAGETYPE_PNG => imagecreatefrompng($targetAbs),
-                    IMAGETYPE_WEBP => function_exists('imagecreatefromwebp') ? imagecreatefromwebp($targetAbs) : null,
-                    default => null,
-                };
+                $ow = $info[0];
+                $oh = $info[1];
+                $type = $info[2];
+                $src = create_image_resource($targetAbs, $type);
                 if ($src) {
                     $dst = imagecreatetruecolor($w, $h);
                     imagecopyresampled($dst, $src, 0, 0, 0, 0, $w, $h, $ow, $oh);
-                    match ($type) {
-                        IMAGETYPE_JPEG => imagejpeg($dst, $targetAbs, 85),
-                        IMAGETYPE_PNG => imagepng($dst, $targetAbs, 6),
-                        IMAGETYPE_WEBP => function_exists('imagewebp') ? imagewebp($dst, $targetAbs, 85) : false,
-                        default => false,
-                    };
+                    if (save_image_resource($dst, $targetAbs, $type)) {
+                        $message = 'Slika je uspešno resize-ovana.';
+                    } else {
+                        $error = 'Format slike nije podržan za resize.';
+                    }
                     imagedestroy($src);
                     imagedestroy($dst);
-                    $message = 'Slika je uspešno resize-ovana.';
+                } else {
+                    $error = 'Format slike nije podržan za resize.';
                 }
             }
         } else {
@@ -100,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'upload_new' && isset($_FILES['new_image']) && $_FILES['new_image']['error'] === UPLOAD_ERR_OK) {
-        $targetDir = $_POST['target_dir'] ?? 'blog/uploads';
+        $targetDir = isset($_POST['target_dir']) ? $_POST['target_dir'] : 'blog/uploads';
         $allowedTarget = realpath(__DIR__ . '/../../' . $targetDir);
         if ($allowedTarget && is_allowed_path($allowedTarget, $allowedRoots)) {
             $filename = time() . '-' . preg_replace('/\s+/', '-', basename($_FILES['new_image']['name']));
@@ -122,7 +162,10 @@ foreach ($allowedRoots as $root) {
         }
     }
 }
-usort($images, fn($a,$b)=>strcmp($a['rel'],$b['rel']));
+
+usort($images, function ($a, $b) {
+    return strcmp($a['rel'], $b['rel']);
+});
 
 $current = 'media';
 ?>
@@ -141,15 +184,15 @@ $current = 'media';
 </form></div></section>
 
 <section class="section"><div class="section-header"><h2>Sve slike (<?= count($images); ?>)</h2></div><div class="table-wrap"><table class="table"><thead><tr><th>Preview</th><th>Putanja</th><th>Meta</th><th>Akcije</th></tr></thead><tbody>
-<?php foreach ($images as $img): $m = $imageMeta[$img['rel']] ?? ['alt'=>'','title'=>'']; ?>
+<?php foreach ($images as $img): $m = isset($imageMeta[$img['rel']]) ? $imageMeta[$img['rel']] : ['alt' => '', 'title' => '']; ?>
 <tr>
 <td><img class="img-thumb" src="<?= admin_esc(getSiteBaseUrl() . '/' . str_replace(' ', '%20', $img['rel'])); ?>" alt=""></td>
 <td><code><?= admin_esc($img['rel']); ?></code></td>
 <td>
 <form method="POST" class="form-grid" style="grid-template-columns:1fr;">
 <input type="hidden" name="action" value="save_meta"><input type="hidden" name="target" value="<?= admin_esc($img['rel']); ?>">
-<input type="text" name="alt" placeholder="Alt" value="<?= admin_esc($m['alt'] ?? ''); ?>">
-<input type="text" name="title" placeholder="Title" value="<?= admin_esc($m['title'] ?? ''); ?>">
+<input type="text" name="alt" placeholder="Alt" value="<?= admin_esc(isset($m['alt']) ? $m['alt'] : ''); ?>">
+<input type="text" name="title" placeholder="Title" value="<?= admin_esc(isset($m['title']) ? $m['title'] : ''); ?>">
 <button class="btn btn-secondary btn-sm" type="submit">Sačuvaj meta</button>
 </form>
 </td>
