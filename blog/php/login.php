@@ -2,58 +2,79 @@
 session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+
 require_once 'Database.php';
 require_once 'User.php';
 
-// Trajanje sesije u sekundama (1 sat)
-$inactive = 21600;
-
-// Proveravamo da li je korisnik bio neaktivan
-if (isset($_SESSION['last_activity'])) {
-    $session_life = time() - $_SESSION['last_activity'];
-    if ($session_life > $inactive) {
-        // Uništavanje sesije nakon isteka vremena
-        session_unset();
-        session_destroy();
-        header("Location: login.php"); // Preusmeravanje na stranicu za login
-        exit();
-    }
+if (isset($_SESSION['user_id']) && ($_SESSION['role'] ?? '') === 'admin') {
+    header('Location: dashboard.php');
+    exit();
 }
 
-// Ažuriramo poslednje vreme aktivnosti
-$_SESSION['last_activity'] = time();
+$error = '';
 
-// Povezivanje sa bazom
-$database = new Database();
-$db = $database->connect();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $database = new Database();
+    $db = $database->connect();
+    $user = new User($db);
 
-// Kreiramo instancu korisnika
-$user = new User($db);
+    $user->email = htmlspecialchars(strip_tags($_POST['email'] ?? ''));
+    $password = htmlspecialchars(strip_tags($_POST['password'] ?? ''));
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $user->email = htmlspecialchars(strip_tags($_POST['email']));
-    $password = htmlspecialchars(strip_tags($_POST['password'])); // Unesena lozinka
-
-    // Proverite da li korisnik postoji
     if ($user->emailExists()) {
-        $user->password_hash = $password; // Postavljanje unete lozinke za proveru
-
+        $user->password_hash = $password;
         if ($user->login()) {
-            // Postavljamo podatke u sesiju
             $_SESSION['user_id'] = $user->id;
             $_SESSION['username'] = $user->username;
             $_SESSION['role'] = $user->role;
-
-            // Ažuriramo poslednje vreme aktivnosti
             $_SESSION['last_activity'] = time();
 
-            // Preusmeravamo korisnika na dashboard
-            header("Location: dashboard.php");
+            header('Location: dashboard.php');
             exit();
-        } else {
-            echo "Email ili lozinka nisu tačni.";
         }
-    } else {
-        echo "Korisnik sa ovom email adresom nije pronađen.";
     }
+
+    $error = 'Email ili lozinka nisu tačni.';
 }
+?>
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin prijava | Akcent Blog</title>
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+    <main class="admin-wrap" style="max-width:640px; margin-top:80px;">
+        <section class="topbar" style="display:block;">
+            <h1>Akcent Blog Admin</h1>
+            <p class="muted" style="margin-top:6px;">Prijavi se za upravljanje postovima, kategorijama i komentarima.</p>
+        </section>
+
+        <?php if ($error): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+        <?php endif; ?>
+
+        <section class="section">
+            <div class="section-header"><h2>Prijava</h2></div>
+            <div style="padding:14px;">
+                <form method="POST" class="form-grid">
+                    <div class="form-group full">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group full">
+                        <label for="password">Lozinka</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="form-group full" style="display:flex; flex-direction:row; justify-content:space-between; align-items:center;">
+                        <button class="btn btn-primary" type="submit">Prijavi se</button>
+                        <a href="forgot_password.php">Zaboravljena lozinka?</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

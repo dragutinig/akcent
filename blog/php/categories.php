@@ -1,198 +1,180 @@
 <?php
-// categories.php
+require_once 'Database.php';
+require_once 'admin_bootstrap.php';
 
-require_once 'Database.php'; // Pretpostavljamo da baza već postoji.
-session_start();
+$database = new Database();
+$db = $database->connect();
 
-// Proveri da li je korisnik prijavljen
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../html/login.html");
-    exit();
-}
-
-// Proveri da li je uloga korisnika 'admin'
-if ($_SESSION['role'] !== 'admin') {
-    echo "Pristup odbijen! Nemate administratorske privilegije.";
-    exit();
-}
-
-// Dodavanje nove kategorije
-if (isset($_POST['add_category'])) {
-    $name = $_POST['name'];
-    $slug = $_POST['slug'];
-
-    $db = (new Database())->connect();
-
-    $query = "INSERT INTO categories (name, slug) VALUES (?, ?)";
-    $stmt = $db->prepare($query);
-    $stmt->bind_param('ss', $name, $slug);
-    $stmt->execute();
-    header("Location: categories.php");
-    exit();
-}
-
-// Uređivanje kategorije
-if (isset($_POST['edit_category'])) {
-    $id = $_POST['id'];
-    $name = $_POST['name'];
-    $slug = $_POST['slug'];
-
-    $db = (new Database())->connect();
-
-    $query = "UPDATE categories SET name = ?, slug = ? WHERE id = ?";
-    $stmt = $db->prepare($query);
-    $stmt->bind_param('ssi', $name, $slug, $id);
-    $stmt->execute();
-    header("Location: categories.php");
-    exit();
-}
-
-// Brisanje kategorije
-if (isset($_GET['delete'])) {
-    $id = $_GET['delete'];
-
-    $db = (new Database())->connect();
-
-    $query = "DELETE FROM categories WHERE id = ?";
-    $stmt = $db->prepare($query);
-    $stmt->bind_param('i', $id);
-    $stmt->execute();
-    header("Location: categories.php");
-    exit();
-}
-
-// Prikaz lista kategorija
-function listCategories($db)
+function slugify(string $text): string
 {
-    $query = "SELECT id, name, slug FROM categories";
-    $result = $db->query($query);
+    $text = mb_strtolower(trim($text), 'UTF-8');
+    $text = preg_replace('/[^\p{L}\p{N}]+/u', '-', $text);
+    return trim($text, '-') ?: 'kategorija';
+}
 
-    echo "<h2>Kategorije</h2>";
-    echo "<a href='#addCategory' class='btn btn-success mb-3' data-toggle='modal'>Dodaj novu kategoriju</a>";
-    echo "<table class='table table-striped'>";
-    echo "<tr><th>ID</th><th>Ime</th><th>Slug</th><th>Akcija</th></tr>";
+$message = '';
+$error = '';
 
-    while ($category = $result->fetch_assoc()) {
-        echo "<tr><td>{$category['id']}</td><td>{$category['name']}</td><td>{$category['slug']}</td>";
-        echo "<td>
-                <a href='#editCategory{$category['id']}' class='btn btn-primary btn-sm' data-toggle='modal'>Izmeni</a>
-                <a href='categories.php?delete={$category['id']}' class='btn btn-danger btn-sm'>Obriši</a>
-              </td></tr>";
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_category'])) {
+    $name = trim($_POST['name'] ?? '');
+    $slug = trim($_POST['slug'] ?? '');
+    if ($name === '') {
+        $error = 'Naziv kategorije je obavezan.';
+    } else {
+        $slug = $slug !== '' ? slugify($slug) : slugify($name);
+        $stmt = $db->prepare('INSERT INTO categories (name, slug) VALUES (?, ?)');
+        $stmt->bind_param('ss', $name, $slug);
+        if ($stmt->execute()) {
+            $message = 'Kategorija je uspešno dodata.';
+        } else {
+            $error = 'Greška: ' . $stmt->error;
+        }
     }
-
-    echo "</table>";
 }
 
-// Forma za dodavanje nove kategorije
-function addCategoryForm()
-{
-    echo "<div class='modal fade' id='addCategory' tabindex='-1' role='dialog' aria-labelledby='exampleModalLabel' aria-hidden='true'>
-            <div class='modal-dialog' role='document'>
-                <div class='modal-content'>
-                    <div class='modal-header'>
-                        <h5 class='modal-title' id='exampleModalLabel'>Dodaj novu kategoriju</h5>
-                        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
-                            <span aria-hidden='true'>&times;</span>
-                        </button>
-                    </div>
-                    <form action='categories.php' method='POST'>
-                        <div class='modal-body'>
-                            <div class='form-group'>
-                                <label for='name'>Ime kategorije</label>
-                                <input type='text' name='name' id='name' class='form-control' required>
-                            </div>
-                            <div class='form-group'>
-                                <label for='slug'>Slug</label>
-                                <input type='text' name='slug' id='slug' class='form-control' required>
-                            </div>
-                        </div>
-                        <div class='modal-footer'>
-                            <button type='button' class='btn btn-secondary' data-dismiss='modal'>Zatvori</button>
-                            <button type='submit' name='add_category' class='btn btn-primary'>Dodaj</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>";
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_category'])) {
+    $id = (int) ($_POST['id'] ?? 0);
+    $name = trim($_POST['name'] ?? '');
+    $slug = trim($_POST['slug'] ?? '');
+
+    if ($id <= 0 || $name === '') {
+        $error = 'Neispravni podaci za izmenu kategorije.';
+    } else {
+        $slug = $slug !== '' ? slugify($slug) : slugify($name);
+        $stmt = $db->prepare('UPDATE categories SET name = ?, slug = ? WHERE id = ?');
+        $stmt->bind_param('ssi', $name, $slug, $id);
+        if ($stmt->execute()) {
+            $message = 'Kategorija je uspešno izmenjena.';
+        } else {
+            $error = 'Greška: ' . $stmt->error;
+        }
+    }
 }
 
-// Forma za izmenu kategorije
-function editCategoryForm($category)
-{
-    echo "<div class='modal fade' id='editCategory{$category['id']}' tabindex='-1' role='dialog' aria-labelledby='exampleModalLabel' aria-hidden='true'>
-            <div class='modal-dialog' role='document'>
-                <div class='modal-content'>
-                    <div class='modal-header'>
-                        <h5 class='modal-title' id='exampleModalLabel'>Izmeni kategoriju</h5>
-                        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
-                            <span aria-hidden='true'>&times;</span>
-                        </button>
-                    </div>
-                    <form action='categories.php' method='POST'>
-                        <div class='modal-body'>
-                            <input type='hidden' name='id' value='{$category['id']}'>
-                            <div class='form-group'>
-                                <label for='name'>Ime kategorije</label>
-                                <input type='text' name='name' id='name' class='form-control' value='{$category['name']}' required>
-                            </div>
-                            <div class='form-group'>
-                                <label for='slug'>Slug</label>
-                                <input type='text' name='slug' id='slug' class='form-control' value='{$category['slug']}' required>
-                            </div>
-                        </div>
-                        <div class='modal-footer'>
-                            <button type='button' class='btn btn-secondary' data-dismiss='modal'>Zatvori</button>
-                            <button type='submit' name='edit_category' class='btn btn-primary'>Sačuvaj</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>";
+if (isset($_GET['delete'])) {
+    $id = (int) $_GET['delete'];
+    if ($id > 0) {
+        $stmt = $db->prepare('DELETE FROM categories WHERE id = ?');
+        $stmt->bind_param('i', $id);
+        if ($stmt->execute()) {
+            $message = 'Kategorija je obrisana.';
+        } else {
+            $error = 'Greška: ' . $stmt->error;
+        }
+    }
 }
 
+$categories = $db->query('SELECT id, name, slug FROM categories ORDER BY name ASC');
+$editCategory = null;
+
+if (isset($_GET['edit'])) {
+    $editId = (int) $_GET['edit'];
+    if ($editId > 0) {
+        $stmt = $db->prepare('SELECT id, name, slug FROM categories WHERE id = ?');
+        $stmt->bind_param('i', $editId);
+        $stmt->execute();
+        $editCategory = $stmt->get_result()->fetch_assoc();
+    }
+}
+
+$current = 'categories';
 ?>
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog Admin Dashboard - Kategorije</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Kategorije | Akcent Blog Admin</title>
+    <link rel="stylesheet" href="../css/admin.css">
 </head>
 
 <body>
-    <div class="container mt-5">
-        <h1>Dobrodošli na admin panel</h1>
-        <hr>
+    <main class="admin-shell">
+        <?php include "admin_sidebar.php"; ?>
+        <section class="admin-content">
+        <section class="topbar">
+            <div>
+                <h1>Kategorije</h1>
+                <p class="muted">Upravljanje kategorijama za blog postove.</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <a class="btn btn-secondary" href="dashboard.php">← Dashboard</a>
+                <a class="btn btn-primary" href="create-post.php">+ Novi post</a>
+            </div>
+        </section>
 
-        <?php
-        $database = new Database();
-        $db = $database->connect();
+        <?php if ($message): ?><div class="alert alert-success"><?= admin_esc($message); ?></div><?php endif; ?>
+        <?php if ($error): ?><div class="alert alert-danger"><?= admin_esc($error); ?></div><?php endif; ?>
 
-        // Dodavanje forme za kategorije
-        addCategoryForm();
+        <section class="section">
+            <div class="section-header"><h2>Dodaj novu kategoriju</h2></div>
+            <div style="padding:14px;">
+                <form method="POST" class="form-grid">
+                    <input type="hidden" name="new_category" value="1">
+                    <div class="form-group">
+                        <label for="name">Naziv</label>
+                        <input id="name" type="text" name="name" placeholder="npr. Moderne kuhinje" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="slug">Slug (opciono)</label>
+                        <input id="slug" type="text" name="slug" placeholder="npr. moderne-kuhinje">
+                    </div>
+                    <div class="form-group full">
+                        <button class="btn btn-primary" type="submit">Sačuvaj kategoriju</button>
+                    </div>
+                </form>
+            </div>
+        </section>
 
-        // Prikaz kategorija
-        listCategories($db);
-        ?>
+        <?php if ($editCategory): ?>
+            <section class="section">
+                <div class="section-header"><h2>Izmena kategorije #<?= (int) $editCategory['id']; ?></h2></div>
+                <div style="padding:14px;">
+                    <form method="POST" class="form-grid">
+                        <input type="hidden" name="edit_category" value="1">
+                        <input type="hidden" name="id" value="<?= (int) $editCategory['id']; ?>">
+                        <div class="form-group">
+                            <label for="edit_name">Naziv</label>
+                            <input id="edit_name" type="text" name="name" value="<?= admin_esc($editCategory['name']); ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_slug">Slug</label>
+                            <input id="edit_slug" type="text" name="slug" value="<?= admin_esc($editCategory['slug']); ?>" required>
+                        </div>
+                        <div class="form-group full">
+                            <button class="btn btn-info" type="submit">Sačuvaj izmene</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        <?php endif; ?>
 
-        <!-- Za editovanje kategorija -->
-        <?php
-        $query = "SELECT id, name, slug FROM categories";
-        $result = $db->query($query);
-
-        while ($category = $result->fetch_assoc()) {
-            editCategoryForm($category);
-        }
-        ?>
-
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <section class="section">
+            <div class="section-header"><h2>Lista kategorija</h2></div>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                        <tr><th>ID</th><th>Naziv</th><th>Slug</th><th>Akcije</th></tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($cat = $categories->fetch_assoc()): ?>
+                            <tr>
+                                <td><?= (int) $cat['id']; ?></td>
+                                <td><?= admin_esc($cat['name']); ?></td>
+                                <td><?= admin_esc($cat['slug']); ?></td>
+                                <td>
+                                    <a class="btn btn-info btn-sm" href="categories.php?edit=<?= (int) $cat['id']; ?>">Izmeni</a>
+                                    <a class="btn btn-danger btn-sm" href="categories.php?delete=<?= (int) $cat['id']; ?>" onclick="return confirm('Obrisati kategoriju?');">Obriši</a>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+            </section>
+    </main>
 </body>
 
 </html>
