@@ -128,3 +128,43 @@ function resolveImageUrl(string $rawPath): string
 
     return getBlogBasePath() . '/uploads/' . ltrim($rawPath, '/');
 }
+
+
+function encodePathSegments(string $path): string
+{
+    $parts = explode('/', $path);
+    $encoded = [];
+    foreach ($parts as $part) {
+        if ($part === '') {
+            $encoded[] = '';
+            continue;
+        }
+        $encoded[] = rawurlencode(rawurldecode($part));
+    }
+    return implode('/', $encoded);
+}
+
+function buildPublicUrlFromPath(string $rawPath): string
+{
+    $rawPath = trim($rawPath);
+    if ($rawPath === '') {
+        return '';
+    }
+
+    if (preg_match('#^https?://#i', $rawPath)) {
+        return $rawPath;
+    }
+
+    $path = str_replace('\\', '/', $rawPath);
+    while (strpos($path, '../') === 0) {
+        $path = substr($path, 3);
+    }
+    $path = preg_replace('#/+#', '/', $path);
+
+    $hostBase = getScheme() . '://' . getHostWithPort();
+    if (strpos($path, '/') === 0) {
+        return $hostBase . encodePathSegments($path);
+    }
+
+    return getSiteBaseUrl() . '/' . encodePathSegments(ltrim($path, '/'));
+}

@@ -50,9 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $comments = $repo->listApprovedComments((int) $project['id'], 20);
 $modelUrl = trim((string) ($project['model_path'] ?? ''));
-$modelUrl = $modelUrl !== '' ? (strpos($modelUrl, 'http') === 0 ? $modelUrl : getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $modelUrl), '/')) : '';
+$modelUrl = $modelUrl !== '' ? (strpos($modelUrl, 'http') === 0 ? $modelUrl : buildPublicUrlFromPath($modelUrl)) : '';
 $blogUrl = trim((string) ($project['blog_post_url'] ?? ''));
-$blogUrl = $blogUrl !== '' ? (strpos($blogUrl, 'http') === 0 ? $blogUrl : getSiteBaseUrl() . '/' . ltrim($blogUrl, '/')) : '';
+$blogUrl = $blogUrl !== '' ? (strpos($blogUrl, 'http') === 0 ? $blogUrl : buildPublicUrlFromPath($blogUrl)) : '';
 $metaTitle = trim((string) ($project['meta_title'] ?? '')) ?: $project['title'];
 $metaDesc = trim((string) ($project['meta_description'] ?? ''));
 ?>
@@ -89,7 +89,7 @@ $metaDesc = trim((string) ($project['meta_description'] ?? ''));
 
         <?php if (!empty($project['images'])): ?>
         <section class="project-gallery">
-            <?php foreach ($project['images'] as $img): $src = getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $img['image_path']), '/'); ?>
+            <?php foreach ($project['images'] as $img): $src = buildPublicUrlFromPath($img['image_path']); ?>
                 <img src="<?php echo htmlspecialchars($src, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars((string) ($img['alt_text'] ?: $project['title']), ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo htmlspecialchars((string) ($img['title_text'] ?: $project['title']), ENT_QUOTES, 'UTF-8'); ?>">
             <?php endforeach; ?>
         </section>

@@ -32,7 +32,7 @@ $projects = $repo->listProjects('published');
     <section class="projects-grid">
         <?php foreach ($projects as $project):
             $cover = $project['images'][0]['image_path'] ?? '';
-            $coverUrl = $cover !== '' ? getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $cover), '/') : '';
+            $coverUrl = $cover !== '' ? buildPublicUrlFromPath($cover) : '';
         ?>
         <article class="project-card">
             <?php if ($coverUrl !== ''): ?>

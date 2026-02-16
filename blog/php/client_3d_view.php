@@ -28,7 +28,7 @@ if (!empty($preview['expires_at']) && strtotime($preview['expires_at']) < time()
 
 $modelUrl = strpos($preview['model_path'], 'http') === 0
     ? $preview['model_path']
-    : getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $preview['model_path']), '/');
+    : buildPublicUrlFromPath($preview['model_path']);
 ?>
 <!doctype html>
 <html lang="sr">

@@ -106,6 +106,21 @@ while ($row = $relatedResult->fetch_assoc()) {
     $relatedPosts[] = $row;
 }
 
+
+$relatedStmt = $conn->prepare("SELECT posts.title, posts.slug, categories.slug AS category_slug
+    FROM posts
+    JOIN categories ON posts.category_id = categories.id
+    WHERE posts.status = 'published' AND categories.slug = ? AND posts.slug <> ?
+    ORDER BY posts.published_at DESC
+    LIMIT 3");
+$relatedStmt->bind_param('ss', $categorySlug, $postSlug);
+$relatedStmt->execute();
+$relatedResult = $relatedStmt->get_result();
+$relatedPosts = [];
+while ($row = $relatedResult->fetch_assoc()) {
+    $relatedPosts[] = $row;
+}
+
 // Upit za tagove povezane sa postom
 $tagsQuery = "
     SELECT tags.name
@@ -122,7 +137,9 @@ while ($tag = $tagsResult->fetch_assoc()) {
 }
 $tagsString = implode(', ', $tags);
 
-$conn->query("CREATE TABLE IF NOT EXISTS post_comments_public (
+$commentMessage = '';
+$commentsStorageMode = 'db';
+$tableReady = $conn->query("CREATE TABLE IF NOT EXISTS post_comments_public (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     post_id INT UNSIGNED NOT NULL,
     author_name VARCHAR(120) NOT NULL,
@@ -132,8 +149,15 @@ $conn->query("CREATE TABLE IF NOT EXISTS post_comments_public (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_post_comments_public (post_id, status, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+if ($tableReady === false) {
+    $commentsStorageMode = 'file';
+}
 
-$commentMessage = '';
+$commentsFile = __DIR__ . '/../data/post_comments_fallback.json';
+if ($commentsStorageMode === 'file' && !is_dir(dirname($commentsFile))) {
+    mkdir(dirname($commentsFile), 0777, true);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['post_comment_submit'])) {
     $name = trim($_POST['comment_name'] ?? '');
     $email = trim($_POST['comment_email'] ?? '');
@@ -150,16 +174,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['post_comment_submit']
         if (time() - $last < 20) {
             $commentMessage = 'Sačekaj malo pre novog komentara.';
         } else {
-            $stmtCommentInsert = $conn->prepare('INSERT INTO post_comments_public (post_id, author_name, author_email, comment_text, status) VALUES (?, ?, ?, ?, "approved")');
-            $postIdForComment = (int) $post['id'];
             $safeName = mb_substr($name, 0, 120);
             $safeEmail = mb_substr($email, 0, 190);
             $safeText = mb_substr($text, 0, 2000);
-            $stmtCommentInsert->bind_param('isss', $postIdForComment, $safeName, $safeEmail, $safeText);
-            $stmtCommentInsert->execute();
+
+            if ($commentsStorageMode === 'db') {
+                $stmtCommentInsert = $conn->prepare('INSERT INTO post_comments_public (post_id, author_name, author_email, comment_text, status) VALUES (?, ?, ?, ?, "approved")');
+                if ($stmtCommentInsert) {
+                    $postIdForComment = (int) $post['id'];
+                    $stmtCommentInsert->bind_param('isss', $postIdForComment, $safeName, $safeEmail, $safeText);
+                    $stmtCommentInsert->execute();
+                }
+            } else {
+                $all = file_exists($commentsFile) ? json_decode(file_get_contents($commentsFile), true) : [];
+                if (!is_array($all)) {
+                    $all = [];
+                }
+                $postKey = (string) ((int) $post['id']);
+                if (!isset($all[$postKey]) || !is_array($all[$postKey])) {
+                    $all[$postKey] = [];
+                }
+                $all[$postKey][] = [
+                    'author_name' => $safeName,
+                    'author_email' => $safeEmail,
+                    'comment_text' => $safeText,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ];
+                file_put_contents($commentsFile, json_encode($all, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            }
+
             $_SESSION[$key] = time();
             $commentMessage = 'Komentar je objavljen.';
         }
+    }
+}
+
+$postComments = [];
+if ($commentsStorageMode === 'db') {
+    $stmtCommentList = $conn->prepare('SELECT author_name, comment_text, created_at FROM post_comments_public WHERE post_id = ? AND status = "approved" ORDER BY created_at DESC LIMIT 25');
+    if ($stmtCommentList) {
+        $postIdForList = (int) $post['id'];
+        $stmtCommentList->bind_param('i', $postIdForList);
+        $stmtCommentList->execute();
+        $resCommentList = $stmtCommentList->get_result();
+        while ($row = $resCommentList->fetch_assoc()) {
+            $postComments[] = $row;
+        }
+    }
+} else {
+    $all = file_exists($commentsFile) ? json_decode(file_get_contents($commentsFile), true) : [];
+    if (is_array($all)) {
+        $postComments = array_reverse($all[(string) ((int) $post['id'])] ?? []);
     }
 }
 

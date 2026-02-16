@@ -85,6 +85,35 @@ class ProjectRepository
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     }
 
+
+
+    private function normalizeStoredPath(?string $path): string
+    {
+        $path = trim((string) $path);
+        if ($path === '') {
+            return '';
+        }
+
+        if (preg_match('#^https?://#i', $path)) {
+            return $path;
+        }
+
+        $path = str_replace('\\', '/', $path);
+
+        // legacy absolute filesystem path -> convert to relative from /blog or /img or /gallery
+        foreach (array('/blog/', '/img/', '/gallery/') as $needle) {
+            $pos = stripos($path, $needle);
+            if ($pos !== false) {
+                return ltrim(substr($path, $pos + 1), '/');
+            }
+        }
+
+        while (strpos($path, '../') === 0) {
+            $path = substr($path, 3);
+        }
+
+        return ltrim($path, '/');
+    }
     public function createProject(array $data): int
     {
         $sql = "INSERT INTO projects (title, slug, status, meta_title, meta_description, excerpt, content, model_path, blog_post_url, published_at)
@@ -117,6 +146,8 @@ class ProjectRepository
 
         $rows = [];
         while ($row = $result->fetch_assoc()) {
+            $row['model_path'] = $this->normalizeStoredPath($row['model_path'] ?? '');
+            $row['blog_post_url'] = $this->normalizeStoredPath($row['blog_post_url'] ?? '');
             $row['images'] = $this->listProjectImages((int) $row['id']);
             $rows[] = $row;
         }
@@ -132,6 +163,8 @@ class ProjectRepository
         if (!$project) {
             return null;
         }
+        $project['model_path'] = $this->normalizeStoredPath($project['model_path'] ?? '');
+        $project['blog_post_url'] = $this->normalizeStoredPath($project['blog_post_url'] ?? '');
         $project['images'] = $this->listProjectImages((int) $project['id']);
         return $project;
     }
@@ -144,6 +177,7 @@ class ProjectRepository
         $res = $stmt->get_result();
         $rows = [];
         while ($r = $res->fetch_assoc()) {
+            $r['image_path'] = $this->normalizeStoredPath($r['image_path'] ?? '');
             $rows[] = $r;
         }
         return $rows;
@@ -207,6 +241,9 @@ class ProjectRepository
         $stmt->bind_param('i', $id);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
+        if ($row) {
+            $row['model_path'] = $this->normalizeStoredPath($row['model_path'] ?? '');
+        }
         return $row ?: null;
     }
 
@@ -216,6 +253,9 @@ class ProjectRepository
         $stmt->bind_param('s', $token);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
+        if ($row) {
+            $row['model_path'] = $this->normalizeStoredPath($row['model_path'] ?? '');
+        }
         return $row ?: null;
     }
 
