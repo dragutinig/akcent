@@ -1,10 +1,9 @@
 <?php
-session_start();
+require_once 'config.php';
 
-// Uništavamo sesiju
+session_start();
 session_unset();
 session_destroy();
 
-// Preusmeravamo korisnika na login stranicu
-header("Location: /blog/html/reg.html");
+header('Location: ' . getBlogBasePath() . '/php/login.php');
 exit();
