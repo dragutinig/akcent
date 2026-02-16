@@ -168,6 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div style="display:flex; gap:8px;">
                 <a class="btn btn-secondary" href="dashboard.php">← Dashboard</a>
                 <a class="btn btn-secondary" href="create-post.php">+ Novi post</a>
+                <a class="btn btn-info" target="_blank" href="preview.php?post_id=<?= (int) $post_id; ?>">Preview nacrta</a>
             </div>
         </section>
 
