@@ -58,6 +58,17 @@ class ProjectRepository
             INDEX idx_project_comments_project_status (project_id, status, created_at)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+
+        $this->db->query("CREATE TABLE IF NOT EXISTS post_comments_public (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            post_id INT UNSIGNED NOT NULL,
+            author_name VARCHAR(120) NOT NULL,
+            author_email VARCHAR(190) DEFAULT NULL,
+            comment_text TEXT NOT NULL,
+            status ENUM('approved','pending','spam') NOT NULL DEFAULT 'approved',
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_post_comments_public (post_id, status, created_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
         $this->db->query("CREATE TABLE IF NOT EXISTS client_3d_previews (
             id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             client_name VARCHAR(190) NOT NULL,

@@ -3,6 +3,7 @@ require_once __DIR__ . '/blog/php/config.php';
 require_once __DIR__ . '/blog/php/Database.php';
 require_once __DIR__ . '/blog/php/ProjectRepository.php';
 
+start_secure_session();
 $db = (new Database())->connect();
 $repo = new ProjectRepository($db);
 $repo->ensureSchema();
@@ -15,96 +16,45 @@ if (!$project || $project['status'] !== 'published') {
     exit();
 }
 
-function resolveProjectAssetUrl(string $rawPath): string
-{
-    $rawPath = trim($rawPath);
-    if ($rawPath === '') {
-        return '';
-    }
+$flash = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $comment = trim($_POST['comment'] ?? '');
+    $website = trim($_POST['website'] ?? '');
 
-    if (preg_match('#^https?://#i', $rawPath)) {
-        return $rawPath;
-    }
-
-    $normalized = str_replace('\\', '/', $rawPath);
-
-    if (strpos($normalized, 'blog/') === 0) {
-        return getSiteBaseUrl() . '/' . str_replace(' ', '%20', ltrim($normalized, '/'));
-    }
-
-    if (strpos($normalized, 'uploads/') === 0 || strpos($normalized, '../uploads/') === 0) {
-        $normalized = ltrim(str_replace('../', '', $normalized), '/');
-        return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $normalized);
-    }
-
-    $uploadsMarker = '/blog/uploads/projects/';
-    $pos = strpos($normalized, $uploadsMarker);
-    if ($pos !== false) {
-        $relative = substr($normalized, $pos + 1);
-        return getSiteBaseUrl() . '/' . str_replace(' ', '%20', $relative);
-    }
-
-    $projectsMarker = 'uploads/projects/';
-    $pos2 = strpos($normalized, $projectsMarker);
-    if ($pos2 !== false) {
-        $relative = substr($normalized, $pos2);
-        return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $relative);
-    }
-
-    if (preg_match('#^[A-Za-z]:/#', $normalized) || strpos($normalized, '/') === 0) {
-        $file = basename($normalized);
-        if ($file !== '') {
-            return getSiteBaseUrl() . '/blog/uploads/projects/' . rawurlencode($file);
+    if ($website !== '') {
+        $flash = 'Komentar nije sačuvan.';
+    } elseif ($name === '' || $comment === '') {
+        $flash = 'Popuni ime i komentar.';
+    } else {
+        $key = 'project_comment_' . $project['id'];
+        $last = (int) ($_SESSION[$key] ?? 0);
+        if (time() - $last < 20) {
+            $flash = 'Sačekaj malo pre narednog komentara.';
+        } else {
+            $repo->addComment([
+                'project_id' => (int) $project['id'],
+                'author_name' => mb_substr($name, 0, 120),
+                'author_email' => mb_substr($email, 0, 190),
+                'comment_text' => mb_substr($comment, 0, 1500),
+                'status' => 'approved',
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
+                'user_agent' => mb_substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255),
+            ]);
+            $_SESSION[$key] = time();
+            $flash = 'Komentar je objavljen.';
         }
     }
-
-    return getSiteBaseUrl() . '/' . str_replace(' ', '%20', ltrim($normalized, '/'));
 }
 
-function resolveProjectModelUrl(string $rawPath): string
-{
-    $rawPath = trim($rawPath);
-    if ($rawPath === '') {
-        return '';
-    }
-
-    if (preg_match('#^https?://#i', $rawPath)) {
-        return $rawPath;
-    }
-
-    $normalized = str_replace('\\', '/', $rawPath);
-
-    if (strpos($normalized, 'blog/') === 0) {
-        return getSiteBaseUrl() . '/' . str_replace(' ', '%20', ltrim($normalized, '/'));
-    }
-
-    if (strpos($normalized, 'project-models/') === 0) {
-        return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $normalized);
-    }
-
-    $marker = '/blog/project-models/';
-    $pos = strpos($normalized, $marker);
-    if ($pos !== false) {
-        $relative = substr($normalized, $pos + 1);
-        return getSiteBaseUrl() . '/' . str_replace(' ', '%20', $relative);
-    }
-
-    $marker2 = 'project-models/';
-    $pos2 = strpos($normalized, $marker2);
-    if ($pos2 !== false) {
-        $relative = substr($normalized, $pos2);
-        return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $relative);
-    }
-
-    return getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $normalized), '/');
-}
-
-$modelUrl = resolveProjectModelUrl((string) ($project['model_path'] ?? ''));
+$comments = $repo->listApprovedComments((int) $project['id'], 20);
+$modelUrl = trim((string) ($project['model_path'] ?? ''));
+$modelUrl = $modelUrl !== '' ? (strpos($modelUrl, 'http') === 0 ? $modelUrl : getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $modelUrl), '/')) : '';
 $blogUrl = trim((string) ($project['blog_post_url'] ?? ''));
 $blogUrl = $blogUrl !== '' ? (strpos($blogUrl, 'http') === 0 ? $blogUrl : getSiteBaseUrl() . '/' . ltrim($blogUrl, '/')) : '';
 $metaTitle = trim((string) ($project['meta_title'] ?? '')) ?: $project['title'];
 $metaDesc = trim((string) ($project['meta_description'] ?? ''));
-$project3dUrl = 'projekat-3d.php?slug=' . urlencode((string) $project['slug']);
 ?>
 <!doctype html>
 <html class="no-js" lang="sr">
@@ -131,7 +81,7 @@ $project3dUrl = 'projekat-3d.php?slug=' . urlencode((string) $project['slug']);
         <?php if (!empty($project['excerpt'])): ?><p><?php echo htmlspecialchars($project['excerpt'], ENT_QUOTES, 'UTF-8'); ?></p><?php endif; ?>
 
         <div class="d-flex flex-wrap gap-2 mb-3">
-            <?php if ($modelUrl !== ''): ?><a class="btn btn-dark" href="<?php echo htmlspecialchars($project3dUrl, ENT_QUOTES, 'UTF-8'); ?>">Otvori 3D model</a><?php endif; ?>
+            <?php if ($modelUrl !== ''): ?><a class="btn btn-dark" target="_blank" rel="noopener" href="<?php echo htmlspecialchars($modelUrl, ENT_QUOTES, 'UTF-8'); ?>">Otvori 3D model</a><?php endif; ?>
             <?php if ($blogUrl !== ''): ?><a class="btn btn-outline-secondary" href="<?php echo htmlspecialchars($blogUrl, ENT_QUOTES, 'UTF-8'); ?>">Povezani blog post</a><?php endif; ?>
         </div>
 
@@ -139,12 +89,34 @@ $project3dUrl = 'projekat-3d.php?slug=' . urlencode((string) $project['slug']);
 
         <?php if (!empty($project['images'])): ?>
         <section class="project-gallery">
-            <?php foreach ($project['images'] as $img): $src = resolveProjectAssetUrl((string) $img['image_path']); ?>
-                <img src="<?php echo htmlspecialchars($src, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars((string) ($img['alt_text'] ?: $project['title']), ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo htmlspecialchars((string) ($img['title_text'] ?: $project['title']), ENT_QUOTES, 'UTF-8'); ?>" loading="lazy">
+            <?php foreach ($project['images'] as $img): $src = getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $img['image_path']), '/'); ?>
+                <img src="<?php echo htmlspecialchars($src, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars((string) ($img['alt_text'] ?: $project['title']), ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo htmlspecialchars((string) ($img['title_text'] ?: $project['title']), ENT_QUOTES, 'UTF-8'); ?>">
             <?php endforeach; ?>
         </section>
         <?php endif; ?>
     </article>
+
+    <section class="comments-wrap">
+        <h2>Komentari</h2>
+        <?php if ($flash): ?><div class="alert alert-info"><?php echo htmlspecialchars($flash, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
+        <?php foreach ($comments as $c): ?>
+            <div class="comment-item">
+                <strong><?php echo htmlspecialchars($c['author_name'], ENT_QUOTES, 'UTF-8'); ?></strong>
+                <small class="project-date"><?php echo htmlspecialchars(date('d.m.Y H:i', strtotime($c['created_at']))); ?></small>
+                <p class="mb-0"><?php echo nl2br(htmlspecialchars($c['comment_text'], ENT_QUOTES, 'UTF-8')); ?></p>
+            </div>
+        <?php endforeach; ?>
+
+        <form method="post" class="project-detail">
+            <input type="text" name="website" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;">
+            <div class="row g-2">
+                <div class="col-md-6"><input class="form-control" name="name" placeholder="Ime" required></div>
+                <div class="col-md-6"><input class="form-control" type="email" name="email" placeholder="Email (opciono)"></div>
+                <div class="col-12"><textarea class="form-control" name="comment" rows="4" placeholder="Komentar" required></textarea></div>
+                <div class="col-12"><button class="btn btn-primary" type="submit">Pošalji komentar</button></div>
+            </div>
+        </form>
+    </section>
 </main>
 <?php include __DIR__ . '/komponente/footer.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>

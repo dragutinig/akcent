@@ -8,17 +8,16 @@ $db = (new Database())->connect();
 $repo = new ProjectRepository($db);
 $repo->ensureSchema();
 
-$blogRootAbs = dirname(__DIR__);
-$modelStorageAbs = $blogRootAbs . '/project-models';
+$modelStorageAbs = realpath(__DIR__ . '/..') . '/project-models';
 $modelStorageRel = 'blog/project-models';
-$imageStorageAbs = $blogRootAbs . '/uploads/projects';
+$imageStorageAbs = realpath(__DIR__ . '/..') . '/uploads/projects';
 $imageStorageRel = 'blog/uploads/projects';
 
-if (!is_dir($modelStorageAbs) && !mkdir($modelStorageAbs, 0777, true) && !is_dir($modelStorageAbs)) {
-    die('Ne mogu da kreiram project-models folder.');
+if (!is_dir($modelStorageAbs)) {
+    mkdir($modelStorageAbs, 0777, true);
 }
-if (!is_dir($imageStorageAbs) && !mkdir($imageStorageAbs, 0777, true) && !is_dir($imageStorageAbs)) {
-    die('Ne mogu da kreiram uploads/projects folder.');
+if (!is_dir($imageStorageAbs)) {
+    mkdir($imageStorageAbs, 0777, true);
 }
 
 function pslug($text)
@@ -104,21 +103,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($zip->open($_FILES['model_archive']['tmp_name']) === true) {
                         $safeFolder = $slug . '-' . time();
                         $destination = $modelStorageAbs . '/' . $safeFolder;
-
-                        if (!is_dir($destination) && !mkdir($destination, 0777, true) && !is_dir($destination)) {
-                            $error = 'Ne mogu da kreiram folder za live 3D model.';
-                        } elseif ($zip->extractTo($destination) !== true) {
-                            $error = 'ZIP nije uspešno raspakovan u project-models folder.';
-                        }
+                        mkdir($destination, 0777, true);
+                        $zip->extractTo($destination);
                         $zip->close();
 
-                        if ($error === '') {
-                            $entry = find_model_entry_html($destination, $slug);
-                            if ($entry !== '') {
-                                $modelPath = $modelStorageRel . '/' . $safeFolder . '/' . $entry;
-                            } else {
-                                $error = 'ZIP je raspakovan ali nije pronađen .html fajl za 3D prikaz.';
-                            }
+                        $entry = find_model_entry_html($destination, $slug);
+                        if ($entry !== '') {
+                            $modelPath = str_replace('\\', '/', $modelStorageRel . '/' . $safeFolder . '/' . $entry);
+                        } else {
+                            $error = 'ZIP je raspakovan ali nije pronađen .html fajl za 3D prikaz.';
                         }
                     } else {
                         $error = 'Neuspešno otvaranje ZIP arhive.';

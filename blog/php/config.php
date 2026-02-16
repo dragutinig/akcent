@@ -18,12 +18,14 @@ function getProjectBasePath(): string
     $marker = '/blog/php/';
     $position = strpos($scriptName, $marker);
 
-    if ($position === false) {
-        return '';
+    if ($position !== false) {
+        $basePath = rtrim(substr($scriptName, 0, $position), '/');
+        return $basePath === '' ? '' : $basePath;
     }
 
-    $basePath = rtrim(substr($scriptName, 0, $position), '/');
-    return $basePath === '' ? '' : $basePath;
+    // Fallback za stranice van /blog/php (npr. /nasi-projekti.php u podfolderu)
+    $dir = rtrim(str_replace('\\', '/', dirname($scriptName)), '/');
+    return ($dir === '' || $dir === '.') ? '' : $dir;
 }
 
 function getScheme(): string
