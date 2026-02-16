@@ -7,6 +7,7 @@ error_reporting(E_ALL);
 
 
 require_once 'Database.php';
+require_once 'config.php';
 
 
 $requestUri = $_SERVER['REQUEST_URI'];
@@ -15,7 +16,7 @@ $requestUri = $_SERVER['REQUEST_URI'];
 if (isset($_GET['category']) && isset($_GET['slug'])) {
     $categorySlug = $_GET['category'];
     $postSlug = $_GET['slug'];
-} elseif (preg_match('#^/blog/([^/]+)/([^/]+)/?$#', $requestUri, $matches)) {
+} elseif (preg_match('#(?:^|/)blog/([^/]+)/([^/]+)/?$#', parse_url($requestUri, PHP_URL_PATH), $matches)) {
     $categorySlug = $matches[1];
     $postSlug = $matches[2];
 } else {
@@ -68,7 +69,7 @@ $tagsString = implode(', ', $tags);
 
 
 $relativePath = $post['featured_image'];
-$absolutePath = str_replace("../", "https://akcent.rs/blog/", $relativePath);
+$absolutePath = str_replace("../", getBlogBaseUrl() . "/", $relativePath);
 ?>
 
 
@@ -99,7 +100,7 @@ $absolutePath = str_replace("../", "https://akcent.rs/blog/", $relativePath);
     <link rel="stylesheet" href="../css/template.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Canonical Link -->
-    <link rel="canonical" href="https://akcent.rs/blog/<?php echo htmlspecialchars($categorySlug); ?>/<?php echo htmlspecialchars($postSlug); ?>" />
+    <link rel="canonical" href="<?php echo htmlspecialchars(getBlogBaseUrl()); ?>/<?php echo htmlspecialchars($categorySlug); ?>/<?php echo htmlspecialchars($postSlug); ?>" />
     <!-- Meta Description -->
     <meta name="description" content="<?php echo htmlspecialchars($post['meta_description']); ?>">
     <!-- Meta Keywords (tags) -->
@@ -107,7 +108,7 @@ $absolutePath = str_replace("../", "https://akcent.rs/blog/", $relativePath);
 <meta property="og:title" content="<?php echo htmlspecialchars($post['meta_title']); ?>">
 <meta property="og:description" content="<?php echo htmlspecialchars($post['meta_description']); ?>">
 <meta property="og:image" content="<?php echo htmlspecialchars($absolutePath); ?>">
-<meta property="og:url" content="<?php echo "https://akcent.rs/blog/" . $categorySlug . "/" . $postSlug; ?>">
+<meta property="og:url" content="<?php echo htmlspecialchars(getBlogBaseUrl() . "/" . $categorySlug . "/" . $postSlug); ?>">
 <meta name="twitter:card" content="summary_large_image">
 
     <script src="../js/share.js"></script>
@@ -133,7 +134,7 @@ $absolutePath = str_replace("../", "https://akcent.rs/blog/", $relativePath);
         </div>
         
         
-                    <div class="col-5 col-sm-4"> <a href="https://akcent.rs/blog/"
+                    <div class="col-5 col-sm-4"> <a href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/"
                             class="button-37 col-12  btn btn-secondary btn-lg" style="color:#fff !important; font-size:1rem; margin-top:20px">Nazad na blog</a></div>
                 
                 

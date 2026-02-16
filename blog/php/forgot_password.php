@@ -1,6 +1,7 @@
 <?php
 require_once 'Database.php';
 require_once 'User.php';
+require_once 'config.php';
 // Includujemo PHPMailer klase
 require_once '../PHPMailer/src/PHPMailer.php';    // Putanja do PHPMailer.php fajla
 require_once '../PHPMailer/src/SMTP.php';          // Putanja do SMTP.php fajla
@@ -30,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute();
 
         // Generišemo link za resetovanje lozinke
-        $reset_link = "http://localhost/php/reset_password.php?token=" . $token;
+        $reset_link = getBlogBaseUrl() . "/php/reset_password.php?token=" . $token;
 
         // Pošaljite email sa linkom za resetovanje lozinke
         $mail = new PHPMailer(true); // Kreiramo instancu PHPMailer-a

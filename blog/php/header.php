@@ -1,11 +1,12 @@
 <?php
-// Povezivanje sa bazom, učitavanje kategorija
 require_once 'Database.php';
+require_once 'config.php';
 
 $db = new Database();
 $conn = $db->connect();
+$siteBaseUrl = getSiteBaseUrl();
+$blogBasePath = getBlogBasePath();
 
-// SQL upit za kategorije
 $categoriesQuery = "SELECT id, name, slug FROM categories ORDER BY name ASC";
 $categories = $conn->query($categoriesQuery);
 
@@ -16,12 +17,11 @@ if (!$categories) {
 
 <header class="main-header">
     <div class="container">
-      <a id="logo" class="nazad" href="https://akcent.rs/">
-        <img src="https://akcent.rs/img/akcent-namestaj-logo.png" alt="AKCENT Logo" style="max-height: 50px; background-color: black;">
+      <a id="logo" class="nazad" href="<?php echo htmlspecialchars($siteBaseUrl); ?>/">
+        <img src="<?php echo htmlspecialchars($siteBaseUrl); ?>/img/akcent-namestaj-logo.png" alt="AKCENT Logo" style="max-height: 50px; background-color: black;">
     </a>
-         <!-- Centar: My Blog -->
-        <div class="logo">
-            <p><a href="/blog/">Akcent blog</a></p>
+         <div class="logo">
+            <p><a href="<?php echo htmlspecialchars($blogBasePath); ?>/">Akcent blog</a></p>
         </div>
      <nav>
     <a class="dropdown-toggle">
@@ -31,7 +31,7 @@ if (!$categories) {
     <ul class="dropdown-menu">
         <?php while ($category = $categories->fetch_assoc()): ?>
             <li>
-                <a href="/blog/<?php echo $category['slug']; ?>">
+                <a href="<?php echo htmlspecialchars($blogBasePath); ?>/<?php echo $category['slug']; ?>">
                     <?php echo $category['name']; ?>
                 </a>
             </li>
@@ -39,6 +39,6 @@ if (!$categories) {
     </ul>
 </nav>
 
-       
+
     </div>
 </header>
