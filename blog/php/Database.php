@@ -1,12 +1,23 @@
 <?php
 
+require_once 'config.php';
+
 class Database
 {
-     private $host = 'localhost'; // Vaš hostname za MySQL bazu
-    private $username = 'akcentrs_blogdatabase'; // Vaše korisničko ime za bazu
-    private $password = 'Dragigagi1'; // Vaša lozinka za bazu
-    private $dbname = 'akcentrs_blogdatabase'; // Ime baze podataka
+    private $host;
+    private $username;
+    private $password;
+    private $dbname;
     private $conn;
+
+    public function __construct()
+    {
+        $config = getDbConfig();
+        $this->host = $config['host'];
+        $this->username = $config['username'];
+        $this->password = $config['password'];
+        $this->dbname = $config['dbname'];
+    }
 
     public function connect()
     {
