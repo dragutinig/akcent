@@ -1,22 +1,12 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
-    session_set_cookie_params([
-        'lifetime' => 0,
-        'path' => '/',
-        'secure' => $isHttps,
-        'httponly' => true,
-        'samesite' => 'Lax',
-    ]);
-    session_start();
-}
-
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once 'Database.php';
 require_once 'User.php';
 require_once 'config.php';
+
+start_secure_session();
 
 $attemptsFile = __DIR__ . '/../data/login_attempts.json';
 if (!is_dir(dirname($attemptsFile))) {
@@ -58,7 +48,7 @@ $forceLogin = isset($_GET['force']) && $_GET['force'] === '1';
 if ($forceLogin) {
     session_unset();
     session_destroy();
-    session_start();
+    start_secure_session();
 }
 
 if (!$forceLogin && isset($_SESSION['user_id']) && ($_SESSION['role'] ?? '') === 'admin') {

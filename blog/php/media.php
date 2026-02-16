@@ -57,6 +57,14 @@ function create_image_resource($targetAbs, $type)
     return null;
 }
 
+
+function image_default_text($rel)
+{
+    $base = pathinfo($rel, PATHINFO_FILENAME);
+    $base = str_replace(['-', '_'], ' ', $base);
+    return ucwords(trim($base));
+}
+
 function save_image_resource($dst, $targetAbs, $type)
 {
     if ($type === IMAGETYPE_JPEG) {
@@ -171,7 +179,7 @@ $current = 'media';
 ?>
 <!DOCTYPE html><html lang="sr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Media manager</title><link rel="stylesheet" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/css/admin.css"></head>
 <body><main class="admin-shell"><?php include 'admin_sidebar.php'; ?><section class="admin-content">
-<section class="topbar"><div><h1>Media manager</h1><p class="muted">Upravljanje svim slikama: alt/title, zamena, brisanje, upload i resize.</p></div></section>
+<section class="topbar"><div><h1>Media manager</h1><p class="muted">Upravljanje svim slikama: automatski predlozi alt/title, pregled dimenzija, zamena, brisanje, upload i resize.</p></div></section>
 <?php if ($message): ?><div class="alert alert-success"><?= admin_esc($message); ?></div><?php endif; ?>
 <?php if ($error): ?><div class="alert alert-danger"><?= admin_esc($error); ?></div><?php endif; ?>
 
@@ -183,16 +191,17 @@ $current = 'media';
 <div class="form-group full"><button class="btn btn-primary" type="submit">Upload</button></div>
 </form></div></section>
 
-<section class="section"><div class="section-header"><h2>Sve slike (<?= count($images); ?>)</h2></div><div class="table-wrap"><table class="table"><thead><tr><th>Preview</th><th>Putanja</th><th>Meta</th><th>Akcije</th></tr></thead><tbody>
-<?php foreach ($images as $img): $m = isset($imageMeta[$img['rel']]) ? $imageMeta[$img['rel']] : ['alt' => '', 'title' => '']; ?>
+<section class="section"><div class="section-header"><h2>Sve slike (<?= count($images); ?>)</h2></div><div class="table-wrap"><table class="table"><thead><tr><th>Preview</th><th>Putanja</th><th>Dimenzije</th><th>Meta</th><th>Akcije</th></tr></thead><tbody>
+<?php foreach ($images as $img): $m = isset($imageMeta[$img['rel']]) ? $imageMeta[$img['rel']] : ['alt' => '', 'title' => '']; $defaultText = image_default_text($img['rel']); $size = @getimagesize($img['abs']); $dimensions = $size ? ($size[0] . ' x ' . $size[1]) : '-'; ?>
 <tr>
-<td><img class="img-thumb" src="<?= admin_esc(getSiteBaseUrl() . '/' . str_replace(' ', '%20', $img['rel'])); ?>" alt=""></td>
+<td><button type="button" class="media-open" data-src="<?= admin_esc(getSiteBaseUrl() . '/' . str_replace(' ', '%20', $img['rel'])); ?>" data-alt="<?= admin_esc($defaultText); ?>" style="border:0;background:transparent;padding:0;cursor:zoom-in;"><img class="img-thumb" src="<?= admin_esc(getSiteBaseUrl() . '/' . str_replace(' ', '%20', $img['rel'])); ?>" alt=""></button></td>
 <td><code><?= admin_esc($img['rel']); ?></code></td>
+<td><strong><?= admin_esc($dimensions); ?></strong></td>
 <td>
 <form method="POST" class="form-grid" style="grid-template-columns:1fr;">
 <input type="hidden" name="action" value="save_meta"><input type="hidden" name="target" value="<?= admin_esc($img['rel']); ?>">
-<input type="text" name="alt" placeholder="Alt" value="<?= admin_esc(isset($m['alt']) ? $m['alt'] : ''); ?>">
-<input type="text" name="title" placeholder="Title" value="<?= admin_esc(isset($m['title']) ? $m['title'] : ''); ?>">
+<input type="text" name="alt" value="<?= admin_esc(trim((string) (isset($m['alt']) ? $m['alt'] : '')) !== '' ? $m['alt'] : $defaultText); ?>" placeholder="<?= admin_esc($defaultText); ?>">
+<input type="text" name="title" value="<?= admin_esc(trim((string) (isset($m['title']) ? $m['title'] : '')) !== '' ? $m['title'] : $defaultText); ?>" placeholder="<?= admin_esc($defaultText); ?>">
 <button class="btn btn-secondary btn-sm" type="submit">Sačuvaj meta</button>
 </form>
 </td>
@@ -204,4 +213,27 @@ $current = 'media';
 </tr>
 <?php endforeach; ?>
 </tbody></table></div></section>
+
+<div id="mediaModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;align-items:center;justify-content:center;padding:24px;">
+  <div style="position:relative;max-width:95vw;max-height:95vh;">
+    <button id="mediaModalClose" type="button" class="btn btn-danger btn-sm" style="position:absolute;top:-40px;right:0;">Zatvori ✕</button>
+    <img id="mediaModalImg" src="" alt="" style="max-width:95vw;max-height:90vh;border-radius:10px;border:2px solid #475569;">
+  </div>
+</div>
+<script>
+(function(){
+  const modal=document.getElementById('mediaModal');
+  const img=document.getElementById('mediaModalImg');
+  const closeBtn=document.getElementById('mediaModalClose');
+  document.querySelectorAll('.media-open').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      img.src=btn.getAttribute('data-src');
+      img.alt=btn.getAttribute('data-alt')||'';
+      modal.style.display='flex';
+    });
+  });
+  closeBtn.addEventListener('click',()=> modal.style.display='none');
+  modal.addEventListener('click',(e)=>{ if(e.target===modal){ modal.style.display='none'; }});
+})();
+</script>
 </section></main></body></html>

@@ -38,6 +38,8 @@ $metaDescription = trim((string) ($post['meta_description'] ?? ''));
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars(getSiteBaseUrl()); ?>/css/style.css">
     <title><?php echo htmlspecialchars($metaTitle, ENT_QUOTES, 'UTF-8'); ?> (Preview)</title>
     <meta name="robots" content="noindex, nofollow">
     <?php if ($metaDescription !== ''): ?>
@@ -65,6 +67,7 @@ $metaDescription = trim((string) ($post['meta_description'] ?? ''));
         <a href="dashboard.php" class="button-37 col-12 btn btn-secondary btn-lg" style="color:#fff !important; font-size:1rem; margin-top:20px">Nazad na dashboard</a>
     </div>
 </article>
+<?php include '../../komponente/cookie-banner.php'; ?>
 <?php include '../../komponente/footer.php'; ?>
 </body>
 </html>

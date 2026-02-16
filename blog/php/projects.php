@@ -1,21 +1,23 @@
 <?php
 require_once 'config.php';
 require_once 'admin_bootstrap.php';
+require_once 'Database.php';
+require_once 'ProjectRepository.php';
 
-$dataFile = __DIR__ . '/../data/projects.json';
+$db = (new Database())->connect();
+$repo = new ProjectRepository($db);
+$repo->ensureSchema();
+
 $modelStorageAbs = realpath(__DIR__ . '/..') . '/project-models';
 $modelStorageRel = 'blog/project-models';
+$imageStorageAbs = realpath(__DIR__ . '/..') . '/uploads/projects';
+$imageStorageRel = 'blog/uploads/projects';
 
-if (!is_dir(dirname($dataFile))) {
-    mkdir(dirname($dataFile), 0777, true);
-}
 if (!is_dir($modelStorageAbs)) {
     mkdir($modelStorageAbs, 0777, true);
 }
-
-$projects = file_exists($dataFile) ? json_decode(file_get_contents($dataFile), true) : [];
-if (!is_array($projects)) {
-    $projects = [];
+if (!is_dir($imageStorageAbs)) {
+    mkdir($imageStorageAbs, 0777, true);
 }
 
 function pslug($text)
@@ -59,22 +61,37 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = isset($_POST['action']) ? $_POST['action'] : '';
 
+    if ($action === 'delete') {
+        $id = (int) ($_POST['id'] ?? 0);
+        if ($id > 0) {
+            $repo->deleteProject($id);
+            $message = 'Projekat je obrisan.';
+        }
+    }
+
     if ($action === 'add') {
-        $title = trim(isset($_POST['title']) ? $_POST['title'] : '');
-        $slug = pslug(isset($_POST['slug']) && trim($_POST['slug']) !== '' ? $_POST['slug'] : $title);
+        $title = trim($_POST['title'] ?? '');
+        $slug = pslug(trim($_POST['slug'] ?? '') !== '' ? $_POST['slug'] : $title);
+        $status = ($_POST['status'] ?? 'draft') === 'published' ? 'published' : 'draft';
+        $metaTitle = trim($_POST['meta_title'] ?? '');
+        $metaDescription = trim($_POST['meta_description'] ?? '');
+        $excerpt = trim($_POST['excerpt'] ?? '');
+        $content = trim($_POST['content'] ?? '');
+        $blogPostUrl = trim($_POST['blog_post_url'] ?? '');
 
         if ($title === '') {
             $error = 'Naslov je obavezan.';
+        } elseif ($metaTitle === '' || $metaDescription === '') {
+            $error = 'Meta title i meta description su obavezni zbog SEO.';
         } else {
-            $modelUrl = trim(isset($_POST['model_url']) ? $_POST['model_url'] : '');
+            $modelPath = trim($_POST['model_path'] ?? '');
 
             if (isset($_FILES['model_archive']) && $_FILES['model_archive']['error'] === UPLOAD_ERR_OK) {
                 if (!class_exists('ZipArchive')) {
                     $error = 'PHP ZipArchive ekstenzija nije dostupna na serveru.';
                 } else {
                     $zip = new ZipArchive();
-                    $tmpZip = $_FILES['model_archive']['tmp_name'];
-                    if ($zip->open($tmpZip) === true) {
+                    if ($zip->open($_FILES['model_archive']['tmp_name']) === true) {
                         $safeFolder = $slug . '-' . time();
                         $destination = $modelStorageAbs . '/' . $safeFolder;
                         mkdir($destination, 0777, true);
@@ -83,9 +100,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         $entry = find_model_entry_html($destination, $slug);
                         if ($entry !== '') {
-                            $modelUrl = $modelStorageRel . '/' . $safeFolder . '/' . $entry;
+                            $modelPath = $modelStorageRel . '/' . $safeFolder . '/' . $entry;
                         } else {
-                            $error = 'Arhiva je uploadovana, ali nije pronađen .html fajl za 3D pregled.';
+                            $error = 'ZIP je raspakovan ali nije pronađen .html fajl za 3D prikaz.';
                         }
                     } else {
                         $error = 'Neuspešno otvaranje ZIP arhive.';
@@ -94,64 +111,175 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if ($error === '') {
-                $projects[] = [
-                    'id' => time(),
+                $projectId = $repo->createProject([
                     'title' => $title,
                     'slug' => $slug,
-                    'status' => isset($_POST['status']) ? $_POST['status'] : 'draft',
-                    'model_url' => $modelUrl,
-                    'real_images' => trim(isset($_POST['real_images']) ? $_POST['real_images'] : ''),
-                    'blog_url' => trim(isset($_POST['blog_url']) ? $_POST['blog_url'] : ''),
-                    'description' => trim(isset($_POST['description']) ? $_POST['description'] : ''),
-                    'created_at' => date('Y-m-d H:i:s'),
-                ];
-                $message = 'Projekat je dodat.';
+                    'status' => $status,
+                    'meta_title' => $metaTitle,
+                    'meta_description' => $metaDescription,
+                    'excerpt' => $excerpt,
+                    'content' => $content,
+                    'model_path' => $modelPath,
+                    'blog_post_url' => $blogPostUrl,
+                    'published_at' => $status === 'published' ? date('Y-m-d H:i:s') : null,
+                ]);
+
+                $altTexts = $_POST['image_alt'] ?? [];
+                $titleTexts = $_POST['image_title'] ?? [];
+
+                if (isset($_FILES['project_images']) && is_array($_FILES['project_images']['name'])) {
+                    $count = count($_FILES['project_images']['name']);
+                    for ($i = 0; $i < $count; $i++) {
+                        if (($_FILES['project_images']['error'][$i] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+                            continue;
+                        }
+
+                        $name = $_FILES['project_images']['name'][$i];
+                        $tmp = $_FILES['project_images']['tmp_name'][$i];
+                        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                        if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'], true)) {
+                            continue;
+                        }
+
+                        $fileName = $slug . '-' . time() . '-' . $i . '.' . $ext;
+                        $destAbs = $imageStorageAbs . '/' . $fileName;
+                        if (!move_uploaded_file($tmp, $destAbs)) {
+                            continue;
+                        }
+
+                        $size = @getimagesize($destAbs);
+                        $repo->addProjectImage($projectId, [
+                            'image_path' => $imageStorageRel . '/' . $fileName,
+                            'alt_text' => trim($altTexts[$i] ?? ''),
+                            'title_text' => trim($titleTexts[$i] ?? ''),
+                            'sort_order' => $i,
+                            'width' => $size ? (int) $size[0] : null,
+                            'height' => $size ? (int) $size[1] : null,
+                        ]);
+                    }
+                }
+
+                $message = 'Projekat je sačuvan u bazi.';
             }
         }
     }
-
-    if ($action === 'delete') {
-        $id = (int) (isset($_POST['id']) ? $_POST['id'] : 0);
-        $projects = array_values(array_filter($projects, function ($p) use ($id) {
-            return (int) (isset($p['id']) ? $p['id'] : 0) !== $id;
-        }));
-        $message = 'Projekat je obrisan.';
-    }
-
-    file_put_contents($dataFile, json_encode($projects, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
 
+$projects = $repo->listProjects();
 $current = 'projects';
 ?>
-<!DOCTYPE html><html lang="sr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Projekti</title><link rel="stylesheet" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/css/admin.css"></head>
-<body><main class="admin-shell"><?php include 'admin_sidebar.php'; ?><section class="admin-content">
-<section class="topbar"><div><h1>Projekti (3D + Realizacija + Blog)</h1><p class="muted">Sačuvaj završene projekte i poveži ih sa blog pričom.</p></div></section>
-<?php if ($message): ?><div class="alert alert-success"><?= admin_esc($message); ?></div><?php endif; ?>
-<?php if ($error): ?><div class="alert alert-danger"><?= admin_esc($error); ?></div><?php endif; ?>
-<section class="section"><div class="section-header"><h2>Novi projekat</h2></div><div style="padding:14px;">
-<form method="POST" enctype="multipart/form-data" class="form-grid">
-<input type="hidden" name="action" value="add">
-<div class="form-group"><label>Naslov</label><input name="title" required></div>
-<div class="form-group"><label>Slug</label><input name="slug" placeholder="opciono"></div>
-<div class="form-group"><label>Status</label><select name="status"><option value="draft">Draft</option><option value="published">Published</option></select></div>
-<div class="form-group"><label>URL 3D modela</label><input name="model_url" placeholder="npr. blog/project-models/model/index.html"></div>
-<div class="form-group full"><label>Upload 3D modela (ZIP foldera)</label><input type="file" name="model_archive" accept=".zip"><small class="muted">Ako pošalješ ZIP folder (html/x3d/js/css), sistem će ga automatski raspakovati.</small></div>
-<div class="form-group full"><label>Realne slike (putanje, odvojene zarezom)</label><input name="real_images" placeholder="gallery/projekat1.webp, img/projekat2.webp"></div>
-<div class="form-group"><label>Blog post URL</label><input name="blog_url" placeholder="/blog/kategorija/slug"></div>
-<div class="form-group full"><label>Opis</label><textarea name="description"></textarea></div>
-<div class="form-group full"><button class="btn btn-primary" type="submit">Sačuvaj projekat</button></div>
-</form></div></section>
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projekti</title>
+    <link rel="stylesheet" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/css/admin.css">
+    <script src="../js/tinymce/tinymce.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        tinymce.init({
+            selector: '#content',
+            height: 320,
+            menubar: false,
+            plugins: 'anchor autolink charmap codesample emoticons image link lists media paste searchreplace table visualblocks wordcount',
+            toolbar: 'undo redo | blocks | bold italic underline | link image media | bullist numlist | removeformat',
+            paste_as_text: true
+        });
 
-<section class="section"><div class="section-header"><h2>Lista projekata</h2></div><div class="table-wrap"><table class="table"><thead><tr><th>Naslov</th><th>Status</th><th>3D model</th><th>Slike</th><th>Blog</th><th>Akcije</th></tr></thead><tbody>
-<?php foreach (array_reverse($projects) as $p): ?>
-<tr>
-<td><strong><?= admin_esc(isset($p['title']) ? $p['title'] : ''); ?></strong><br><span class="muted">slug: <?= admin_esc(isset($p['slug']) ? $p['slug'] : ''); ?></span></td>
-<td><span class="badge <?= (isset($p['status']) ? $p['status'] : '') === 'published' ? 'badge-published' : 'badge-draft'; ?>"><?= admin_esc(isset($p['status']) ? $p['status'] : 'draft'); ?></span></td>
-<td><?php if (!empty($p['model_url'])): ?><a href="<?= admin_esc(strpos($p['model_url'], 'http') === 0 ? $p['model_url'] : getSiteBaseUrl() . '/' . ltrim($p['model_url'], '/')); ?>" target="_blank">Model</a><?php endif; ?></td>
-<td><?= admin_esc(isset($p['real_images']) ? $p['real_images'] : ''); ?></td>
-<td><?= admin_esc(isset($p['blog_url']) ? $p['blog_url'] : ''); ?></td>
-<td><form method="POST" onsubmit="return confirm('Obrisati projekat?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= (int)(isset($p['id']) ? $p['id'] : 0); ?>"><button class="btn btn-danger btn-sm" type="submit">Obriši</button></form></td>
-</tr>
-<?php endforeach; ?>
-</tbody></table></div></section>
-</section></main></body></html>
+        const input = document.getElementById('project_images');
+        const wrap = document.getElementById('images-meta-wrap');
+
+        input.addEventListener('change', function () {
+          wrap.innerHTML = '';
+          Array.from(input.files).forEach((file, i) => {
+            const row = document.createElement('div');
+            row.className = 'form-group full';
+            row.style.border = '1px solid #334155';
+            row.style.padding = '10px';
+            row.style.borderRadius = '8px';
+            row.innerHTML = `<strong>${file.name}</strong>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+                <input type="text" name="image_alt[${i}]" placeholder="Alt (auto: ${file.name.replace(/\.[^.]+$/, '')})">
+                <input type="text" name="image_title[${i}]" placeholder="Title (auto: ${file.name.replace(/\.[^.]+$/, '')})">
+              </div>`;
+            wrap.appendChild(row);
+          });
+        });
+      });
+    </script>
+</head>
+<body>
+<main class="admin-shell">
+    <?php include 'admin_sidebar.php'; ?>
+    <section class="admin-content">
+        <section class="topbar">
+            <div>
+                <h1>Gotovi projekti</h1>
+                <p class="muted">Kreiraj SEO optimizovanu projektnu stranicu na glavnom sajtu.</p>
+            </div>
+        </section>
+
+        <?php if ($message): ?><div class="alert alert-success"><?= admin_esc($message); ?></div><?php endif; ?>
+        <?php if ($error): ?><div class="alert alert-danger"><?= admin_esc($error); ?></div><?php endif; ?>
+
+        <section class="section">
+            <div class="section-header"><h2>Novi projekat</h2></div>
+            <div style="padding:14px;">
+                <form method="POST" enctype="multipart/form-data" class="form-grid">
+                    <input type="hidden" name="action" value="add">
+                    <div class="form-group"><label>Naslov</label><input name="title" required></div>
+                    <div class="form-group"><label>Slug URL</label><input name="slug" placeholder="opciono"></div>
+                    <div class="form-group"><label>Status</label><select name="status"><option value="draft">Draft</option><option value="published">Published</option></select></div>
+                    <div class="form-group"><label>Blog post URL (opciono)</label><input name="blog_post_url" placeholder="/blog/kategorija/slug"></div>
+
+                    <div class="form-group"><label>Meta title</label><input name="meta_title" maxlength="255" required></div>
+                    <div class="form-group"><label>Meta description</label><input name="meta_description" maxlength="320" required></div>
+
+                    <div class="form-group full"><label>Kratak uvod (excerpt)</label><textarea name="excerpt"></textarea></div>
+                    <div class="form-group full"><label>Detaljan opis projekta (editor)</label><textarea id="content" name="content"></textarea></div>
+
+                    <div class="form-group"><label>3D model ZIP</label><input type="file" name="model_archive" accept=".zip"></div>
+                    <div class="form-group"><label>Ili postojeći path 3D modela (opciono)</label><input name="model_path" placeholder="blog/project-models/.../index.html"></div>
+
+                    <div class="form-group full"><label>Fotografije projekta</label><input id="project_images" type="file" name="project_images[]" accept=".jpg,.jpeg,.png,.webp,.gif" multiple></div>
+                    <div id="images-meta-wrap" class="form-group full"></div>
+
+                    <div class="form-group full"><button class="btn btn-primary" type="submit">Sačuvaj projekat</button></div>
+                </form>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-header"><h2>Postojeći projekti</h2></div>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead><tr><th>Naslov</th><th>Status</th><th>Datum</th><th>SEO</th><th>Akcije</th></tr></thead>
+                    <tbody>
+                    <?php foreach ($projects as $p): ?>
+                        <tr>
+                            <td>
+                                <strong><?= admin_esc($p['title']); ?></strong><br>
+                                <span class="muted">slug: <?= admin_esc($p['slug']); ?></span>
+                            </td>
+                            <td><span class="badge <?= $p['status'] === 'published' ? 'badge-published' : 'badge-draft'; ?>"><?= admin_esc($p['status']); ?></span></td>
+                            <td><?= admin_esc($p['created_at']); ?></td>
+                            <td><small><?= admin_esc((string) $p['meta_title']); ?></small></td>
+                            <td>
+                                <a class="btn btn-secondary btn-sm" target="_blank" href="<?= admin_esc(getSiteBaseUrl()); ?>/projekat.php?slug=<?= urlencode($p['slug']); ?>">Pogledaj</a>
+                                <form style="display:inline;" method="POST" onsubmit="return confirm('Obrisati projekat?')">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="<?= (int) $p['id']; ?>">
+                                    <button class="btn btn-danger btn-sm" type="submit">Obriši</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </section>
+</main>
+</body>
+</html>
