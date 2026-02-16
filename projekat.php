@@ -3,7 +3,6 @@ require_once __DIR__ . '/blog/php/config.php';
 require_once __DIR__ . '/blog/php/Database.php';
 require_once __DIR__ . '/blog/php/ProjectRepository.php';
 
-start_secure_session();
 $db = (new Database())->connect();
 $repo = new ProjectRepository($db);
 $repo->ensureSchema();
@@ -16,39 +15,38 @@ if (!$project || $project['status'] !== 'published') {
     exit();
 }
 
-$flash = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $comment = trim($_POST['comment'] ?? '');
-    $website = trim($_POST['website'] ?? '');
+function resolveProjectAssetUrl(string $rawPath): string
+{
+    $rawPath = trim($rawPath);
+    if ($rawPath === '') {
+        return '';
+    }
 
-    if ($website !== '') {
-        $flash = 'Komentar nije sačuvan.';
-    } elseif ($name === '' || $comment === '') {
-        $flash = 'Popuni ime i komentar.';
-    } else {
-        $key = 'project_comment_' . $project['id'];
-        $last = (int) ($_SESSION[$key] ?? 0);
-        if (time() - $last < 20) {
-            $flash = 'Sačekaj malo pre narednog komentara.';
-        } else {
-            $repo->addComment([
-                'project_id' => (int) $project['id'],
-                'author_name' => mb_substr($name, 0, 120),
-                'author_email' => mb_substr($email, 0, 190),
-                'comment_text' => mb_substr($comment, 0, 1500),
-                'status' => 'approved',
-                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
-                'user_agent' => mb_substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255),
-            ]);
-            $_SESSION[$key] = time();
-            $flash = 'Komentar je objavljen.';
+    if (preg_match('#^https?://#i', $rawPath)) {
+        return $rawPath;
+    }
+
+    $normalized = str_replace('\\', '/', $rawPath);
+
+    if (preg_match('#^[A-Za-z]:/#', $normalized)) {
+        $file = basename($normalized);
+        if ($file !== '') {
+            return getSiteBaseUrl() . '/blog/uploads/projects/' . rawurlencode($file);
         }
     }
+
+    if (strpos($normalized, 'blog/') === 0) {
+        return getSiteBaseUrl() . '/' . str_replace(' ', '%20', ltrim($normalized, '/'));
+    }
+
+    if (strpos($normalized, 'uploads/') === 0 || strpos($normalized, '../uploads/') === 0) {
+        $normalized = ltrim(str_replace('../', '', $normalized), '/');
+        return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $normalized);
+    }
+
+    return getSiteBaseUrl() . '/' . str_replace(' ', '%20', ltrim($normalized, '/'));
 }
 
-$comments = $repo->listApprovedComments((int) $project['id'], 20);
 $modelUrl = trim((string) ($project['model_path'] ?? ''));
 $modelUrl = $modelUrl !== '' ? (strpos($modelUrl, 'http') === 0 ? $modelUrl : getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $modelUrl), '/')) : '';
 $blogUrl = trim((string) ($project['blog_post_url'] ?? ''));
@@ -90,34 +88,12 @@ $project3dUrl = 'projekat-3d.php?slug=' . urlencode((string) $project['slug']);
 
         <?php if (!empty($project['images'])): ?>
         <section class="project-gallery">
-            <?php foreach ($project['images'] as $img): $src = getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $img['image_path']), '/'); ?>
-                <img src="<?php echo htmlspecialchars($src, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars((string) ($img['alt_text'] ?: $project['title']), ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo htmlspecialchars((string) ($img['title_text'] ?: $project['title']), ENT_QUOTES, 'UTF-8'); ?>">
+            <?php foreach ($project['images'] as $img): $src = resolveProjectAssetUrl((string) $img['image_path']); ?>
+                <img src="<?php echo htmlspecialchars($src, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars((string) ($img['alt_text'] ?: $project['title']), ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo htmlspecialchars((string) ($img['title_text'] ?: $project['title']), ENT_QUOTES, 'UTF-8'); ?>" loading="lazy">
             <?php endforeach; ?>
         </section>
         <?php endif; ?>
     </article>
-
-    <section class="comments-wrap">
-        <h2>Komentari</h2>
-        <?php if ($flash): ?><div class="alert alert-info"><?php echo htmlspecialchars($flash, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
-        <?php foreach ($comments as $c): ?>
-            <div class="comment-item">
-                <strong><?php echo htmlspecialchars($c['author_name'], ENT_QUOTES, 'UTF-8'); ?></strong>
-                <small class="project-date"><?php echo htmlspecialchars(date('d.m.Y H:i', strtotime($c['created_at']))); ?></small>
-                <p class="mb-0"><?php echo nl2br(htmlspecialchars($c['comment_text'], ENT_QUOTES, 'UTF-8')); ?></p>
-            </div>
-        <?php endforeach; ?>
-
-        <form method="post" class="project-detail">
-            <input type="text" name="website" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;">
-            <div class="row g-2">
-                <div class="col-md-6"><input class="form-control" name="name" placeholder="Ime" required></div>
-                <div class="col-md-6"><input class="form-control" type="email" name="email" placeholder="Email (opciono)"></div>
-                <div class="col-12"><textarea class="form-control" name="comment" rows="4" placeholder="Komentar" required></textarea></div>
-                <div class="col-12"><button class="btn btn-primary" type="submit">Pošalji komentar</button></div>
-            </div>
-        </form>
-    </section>
 </main>
 <?php include __DIR__ . '/komponente/footer.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>

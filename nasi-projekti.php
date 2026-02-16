@@ -8,20 +8,37 @@ $repo = new ProjectRepository($db);
 $repo->ensureSchema();
 $projects = $repo->listProjects('published');
 
-$months = [];
-$years = [];
-foreach ($projects as $p) {
-    $timestamp = strtotime((string) $p['created_at']);
-    if ($timestamp === false) {
-        continue;
+function resolveProjectAssetUrl(string $rawPath): string
+{
+    $rawPath = trim($rawPath);
+    if ($rawPath === '') {
+        return '';
     }
-    $m = date('m', $timestamp);
-    $y = date('Y', $timestamp);
-    $months[$m] = date('F', mktime(0, 0, 0, (int) $m, 1));
-    $years[$y] = $y;
+
+    if (preg_match('#^https?://#i', $rawPath)) {
+        return $rawPath;
+    }
+
+    $normalized = str_replace('\\', '/', $rawPath);
+
+    if (preg_match('#^[A-Za-z]:/#', $normalized)) {
+        $file = basename($normalized);
+        if ($file !== '') {
+            return getSiteBaseUrl() . '/blog/uploads/projects/' . rawurlencode($file);
+        }
+    }
+
+    if (strpos($normalized, 'blog/') === 0) {
+        return getSiteBaseUrl() . '/' . str_replace(' ', '%20', ltrim($normalized, '/'));
+    }
+
+    if (strpos($normalized, 'uploads/') === 0 || strpos($normalized, '../uploads/') === 0) {
+        $normalized = ltrim(str_replace('../', '', $normalized), '/');
+        return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $normalized);
+    }
+
+    return getSiteBaseUrl() . '/' . str_replace(' ', '%20', ltrim($normalized, '/'));
 }
-krsort($years);
-ksort($months);
 ?>
 <!doctype html>
 <html class="no-js" lang="sr">
@@ -42,7 +59,6 @@ ksort($months);
 <div style="height:50px;"></div>
 <main class="projects-shell">
     <h1 class="projects-title">Naši projekti</h1>
-    <p class="projects-subtitle">Tabela / kartice sa projektima: slika, naslov i datum.</p>
 
     <div class="projects-filter">
         <select id="project-month" class="form-select">
@@ -62,12 +78,11 @@ ksort($months);
     <section class="projects-grid">
         <?php foreach ($projects as $project):
             $cover = $project['images'][0]['image_path'] ?? '';
-            $coverUrl = $cover !== '' ? getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $cover), '/') : '';
-            $ts = strtotime((string) $project['created_at']);
+            $coverUrl = resolveProjectAssetUrl((string) $cover);
         ?>
         <article class="project-card" data-month="<?php echo htmlspecialchars($ts ? date('m', $ts) : '', ENT_QUOTES, 'UTF-8'); ?>" data-year="<?php echo htmlspecialchars($ts ? date('Y', $ts) : '', ENT_QUOTES, 'UTF-8'); ?>">
             <?php if ($coverUrl !== ''): ?>
-                <img src="<?php echo htmlspecialchars($coverUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>">
+                <img src="<?php echo htmlspecialchars($coverUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>" loading="lazy">
             <?php endif; ?>
             <div class="project-card-content">
                 <div class="project-date"><?php echo htmlspecialchars(date('d.m.Y', strtotime($project['created_at']))); ?></div>
