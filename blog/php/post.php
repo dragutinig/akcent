@@ -23,20 +23,11 @@ if (!$conn) {
     exit('Connection failed.');
 }
 
-$conn->query("CREATE TABLE IF NOT EXISTS post_comments (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    post_id INT UNSIGNED NOT NULL,
-    author_name VARCHAR(120) NOT NULL,
-    author_email VARCHAR(190) DEFAULT NULL,
-    comment_text TEXT NOT NULL,
-    status ENUM('approved','pending','spam') NOT NULL DEFAULT 'approved',
-    ip_address VARCHAR(45) DEFAULT NULL,
-    user_agent VARCHAR(255) DEFAULT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_post_comments_post_status (post_id, status, created_at),
-    CONSTRAINT fk_post_comments_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-
+$hasPostComments = false;
+$commentsTableCheck = $conn->query("SHOW TABLES LIKE 'post_comments'");
+if ($commentsTableCheck && $commentsTableCheck->num_rows > 0) {
+    $hasPostComments = true;
+}
 $postQuery = "SELECT posts.id, posts.title, posts.content, posts.featured_image, posts.published_at, categories.name AS category_name,
            posts.meta_title, posts.meta_description, posts.slug AS post_slug, categories.slug AS category_slug
     FROM posts
@@ -57,7 +48,7 @@ $post = $result->fetch_assoc();
 $postId = (int) $post['id'];
 
 $flash = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && (($_POST['action'] ?? '') === 'add_comment')) {
+if ($hasPostComments && $_SERVER['REQUEST_METHOD'] === 'POST' && (($_POST['action'] ?? '') === 'add_comment')) {
     start_secure_session();
     $name = trim((string) ($_POST['name'] ?? ''));
     $email = trim((string) ($_POST['email'] ?? ''));
@@ -117,13 +108,15 @@ while ($tag = $tagsResult->fetch_assoc()) {
 }
 $tagsString = implode(', ', $tags);
 
-$commentsStmt = $conn->prepare('SELECT author_name, comment_text, created_at FROM post_comments WHERE post_id = ? AND status = "approved" ORDER BY created_at DESC LIMIT 30');
-$commentsStmt->bind_param('i', $postId);
-$commentsStmt->execute();
-$commentsRes = $commentsStmt->get_result();
 $comments = [];
-while ($c = $commentsRes->fetch_assoc()) {
-    $comments[] = $c;
+if ($hasPostComments) {
+    $commentsStmt = $conn->prepare('SELECT author_name, comment_text, created_at FROM post_comments WHERE post_id = ? AND status = "approved" ORDER BY created_at DESC LIMIT 30');
+    $commentsStmt->bind_param('i', $postId);
+    $commentsStmt->execute();
+    $commentsRes = $commentsStmt->get_result();
+    while ($c = $commentsRes->fetch_assoc()) {
+        $comments[] = $c;
+    }
 }
 
 $absolutePath = resolveImageUrl((string) $post['featured_image']);
@@ -191,6 +184,7 @@ $absolutePath = resolveImageUrl((string) $post['featured_image']);
 
     <section class="blog-comments">
         <h2>Komentari</h2>
+        <?php if (!$hasPostComments): ?><div class="alert alert-warning">Komentari trenutno nisu dostupni dok se ne pokrene DB migracija.</div><?php endif; ?>
         <?php if ($flash): ?><div class="alert alert-info"><?php echo htmlspecialchars($flash, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
         <?php foreach ($comments as $c): ?>
             <div class="blog-comment-item">
@@ -200,6 +194,7 @@ $absolutePath = resolveImageUrl((string) $post['featured_image']);
             </div>
         <?php endforeach; ?>
 
+        <?php if ($hasPostComments): ?>
         <form method="post">
             <input type="hidden" name="action" value="add_comment">
             <input type="text" name="website" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;">
@@ -210,6 +205,7 @@ $absolutePath = resolveImageUrl((string) $post['featured_image']);
                 <div class="col-12"><button class="btn btn-primary" type="submit">Pošalji komentar</button></div>
             </div>
         </form>
+        <?php endif; ?>
     </section>
 </article>
 

@@ -21,13 +21,6 @@ function resolveProjectAssetUrl(string $rawPath): string
 
     $normalized = str_replace('\\', '/', $rawPath);
 
-    if (preg_match('#^[A-Za-z]:/#', $normalized)) {
-        $file = basename($normalized);
-        if ($file !== '') {
-            return getSiteBaseUrl() . '/blog/uploads/projects/' . rawurlencode($file);
-        }
-    }
-
     if (strpos($normalized, 'blog/') === 0) {
         return getSiteBaseUrl() . '/' . str_replace(' ', '%20', ltrim($normalized, '/'));
     }
@@ -35,6 +28,27 @@ function resolveProjectAssetUrl(string $rawPath): string
     if (strpos($normalized, 'uploads/') === 0 || strpos($normalized, '../uploads/') === 0) {
         $normalized = ltrim(str_replace('../', '', $normalized), '/');
         return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $normalized);
+    }
+
+    $uploadsMarker = '/blog/uploads/projects/';
+    $pos = strpos($normalized, $uploadsMarker);
+    if ($pos !== false) {
+        $relative = substr($normalized, $pos + 1);
+        return getSiteBaseUrl() . '/' . str_replace(' ', '%20', $relative);
+    }
+
+    $projectsMarker = 'uploads/projects/';
+    $pos2 = strpos($normalized, $projectsMarker);
+    if ($pos2 !== false) {
+        $relative = substr($normalized, $pos2);
+        return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $relative);
+    }
+
+    if (preg_match('#^[A-Za-z]:/#', $normalized) || strpos($normalized, '/') === 0) {
+        $file = basename($normalized);
+        if ($file !== '') {
+            return getSiteBaseUrl() . '/blog/uploads/projects/' . rawurlencode($file);
+        }
     }
 
     return getSiteBaseUrl() . '/' . str_replace(' ', '%20', ltrim($normalized, '/'));
@@ -59,21 +73,6 @@ function resolveProjectAssetUrl(string $rawPath): string
 <div style="height:50px;"></div>
 <main class="projects-shell">
     <h1 class="projects-title">Naši projekti</h1>
-
-    <div class="projects-filter">
-        <select id="project-month" class="form-select">
-            <option value="">Svi meseci</option>
-            <?php foreach ($months as $monthNumber => $monthName): ?>
-                <option value="<?php echo htmlspecialchars($monthNumber, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($monthName, ENT_QUOTES, 'UTF-8'); ?></option>
-            <?php endforeach; ?>
-        </select>
-        <select id="project-year" class="form-select">
-            <option value="">Sve godine</option>
-            <?php foreach ($years as $year): ?>
-                <option value="<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8'); ?></option>
-            <?php endforeach; ?>
-        </select>
-    </div>
 
     <section class="projects-grid">
         <?php foreach ($projects as $project):

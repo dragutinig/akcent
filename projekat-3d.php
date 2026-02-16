@@ -15,24 +15,46 @@ if (!$project || $project['status'] !== 'published') {
     exit();
 }
 
-$modelPath = trim((string) ($project['model_path'] ?? ''));
-$modelUrl = '';
-$modelError = '';
-
-if ($modelPath === '') {
-    $modelError = '3D model nije dodat za ovaj projekat.';
-} elseif (strpos($modelPath, 'http') === 0) {
-    $modelUrl = $modelPath;
-} else {
-    $normalizedPath = ltrim($modelPath, '/');
-    $absolutePath = __DIR__ . '/' . str_replace('/', DIRECTORY_SEPARATOR, $normalizedPath);
-
-    if (is_file($absolutePath)) {
-        $modelUrl = getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $modelPath), '/');
-    } else {
-        $modelError = '3D fajl nije pronađen na serveru.';
+function resolveProjectModelUrl(string $rawPath): string
+{
+    $rawPath = trim($rawPath);
+    if ($rawPath === '') {
+        return '';
     }
+
+    if (preg_match('#^https?://#i', $rawPath)) {
+        return $rawPath;
+    }
+
+    $normalized = str_replace('\\', '/', $rawPath);
+
+    if (strpos($normalized, 'blog/') === 0) {
+        return getSiteBaseUrl() . '/' . str_replace(' ', '%20', ltrim($normalized, '/'));
+    }
+
+    if (strpos($normalized, 'project-models/') === 0) {
+        return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $normalized);
+    }
+
+    $marker = '/blog/project-models/';
+    $pos = strpos($normalized, $marker);
+    if ($pos !== false) {
+        $relative = substr($normalized, $pos + 1);
+        return getSiteBaseUrl() . '/' . str_replace(' ', '%20', $relative);
+    }
+
+    $marker2 = 'project-models/';
+    $pos2 = strpos($normalized, $marker2);
+    if ($pos2 !== false) {
+        $relative = substr($normalized, $pos2);
+        return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $relative);
+    }
+
+    return getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $normalized), '/');
 }
+
+$modelUrl = resolveProjectModelUrl((string) ($project['model_path'] ?? ''));
+$modelError = $modelUrl === '' ? '3D model nije dodat za ovaj projekat.' : '';
 ?>
 <!doctype html>
 <html class="no-js" lang="sr">

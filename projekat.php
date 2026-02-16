@@ -28,13 +28,6 @@ function resolveProjectAssetUrl(string $rawPath): string
 
     $normalized = str_replace('\\', '/', $rawPath);
 
-    if (preg_match('#^[A-Za-z]:/#', $normalized)) {
-        $file = basename($normalized);
-        if ($file !== '') {
-            return getSiteBaseUrl() . '/blog/uploads/projects/' . rawurlencode($file);
-        }
-    }
-
     if (strpos($normalized, 'blog/') === 0) {
         return getSiteBaseUrl() . '/' . str_replace(' ', '%20', ltrim($normalized, '/'));
     }
@@ -44,11 +37,69 @@ function resolveProjectAssetUrl(string $rawPath): string
         return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $normalized);
     }
 
+    $uploadsMarker = '/blog/uploads/projects/';
+    $pos = strpos($normalized, $uploadsMarker);
+    if ($pos !== false) {
+        $relative = substr($normalized, $pos + 1);
+        return getSiteBaseUrl() . '/' . str_replace(' ', '%20', $relative);
+    }
+
+    $projectsMarker = 'uploads/projects/';
+    $pos2 = strpos($normalized, $projectsMarker);
+    if ($pos2 !== false) {
+        $relative = substr($normalized, $pos2);
+        return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $relative);
+    }
+
+    if (preg_match('#^[A-Za-z]:/#', $normalized) || strpos($normalized, '/') === 0) {
+        $file = basename($normalized);
+        if ($file !== '') {
+            return getSiteBaseUrl() . '/blog/uploads/projects/' . rawurlencode($file);
+        }
+    }
+
     return getSiteBaseUrl() . '/' . str_replace(' ', '%20', ltrim($normalized, '/'));
 }
 
-$modelUrl = trim((string) ($project['model_path'] ?? ''));
-$modelUrl = $modelUrl !== '' ? (strpos($modelUrl, 'http') === 0 ? $modelUrl : getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $modelUrl), '/')) : '';
+function resolveProjectModelUrl(string $rawPath): string
+{
+    $rawPath = trim($rawPath);
+    if ($rawPath === '') {
+        return '';
+    }
+
+    if (preg_match('#^https?://#i', $rawPath)) {
+        return $rawPath;
+    }
+
+    $normalized = str_replace('\\', '/', $rawPath);
+
+    if (strpos($normalized, 'blog/') === 0) {
+        return getSiteBaseUrl() . '/' . str_replace(' ', '%20', ltrim($normalized, '/'));
+    }
+
+    if (strpos($normalized, 'project-models/') === 0) {
+        return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $normalized);
+    }
+
+    $marker = '/blog/project-models/';
+    $pos = strpos($normalized, $marker);
+    if ($pos !== false) {
+        $relative = substr($normalized, $pos + 1);
+        return getSiteBaseUrl() . '/' . str_replace(' ', '%20', $relative);
+    }
+
+    $marker2 = 'project-models/';
+    $pos2 = strpos($normalized, $marker2);
+    if ($pos2 !== false) {
+        $relative = substr($normalized, $pos2);
+        return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $relative);
+    }
+
+    return getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $normalized), '/');
+}
+
+$modelUrl = resolveProjectModelUrl((string) ($project['model_path'] ?? ''));
 $blogUrl = trim((string) ($project['blog_post_url'] ?? ''));
 $blogUrl = $blogUrl !== '' ? (strpos($blogUrl, 'http') === 0 ? $blogUrl : getSiteBaseUrl() . '/' . ltrim($blogUrl, '/')) : '';
 $metaTitle = trim((string) ($project['meta_title'] ?? '')) ?: $project['title'];
