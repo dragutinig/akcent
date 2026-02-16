@@ -1,3 +1,27 @@
-# Include your project-specific ignores in this file
-# Read about how to use .gitignore: https://help.github.com/articles/ignoring-files
-# Useful .gitignore templates: https://github.com/github/gitignore
+# OS/editor
+.DS_Store
+Thumbs.db
+
+# Environment/secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Logs and runtime artifacts
+*.log
+error_log
+
+# Local DB dumps / backups
+*.sql
+*.sql.gz
+*.zip
+*.tar
+*.tar.gz
+
+# PHP / tooling caches
+*.cache
+
+# Keep repository-specific ignores below if needed
+
+# Local app configs

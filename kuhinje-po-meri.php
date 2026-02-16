@@ -23,7 +23,7 @@ Izrada i montaža po meri, bez skrivenih troškova.">
     <link rel="canonical" href="https://akcent.rs/kuhinje-po-meri.php" />
 
     <link rel="manifest" href="site.webmanifest">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon" href="favicon.ico">
     <!-- Place favicon.ico in the root directory -->
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"

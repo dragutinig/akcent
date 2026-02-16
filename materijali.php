@@ -21,7 +21,7 @@
         content="Kvalitetni materijali i okovi za kuhinje i plakare po meri. Celokupan proces: 3D projektovanje, izrada i montaža na jednom mestu.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="manifest" href="site.webmanifest">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon" href="favicon.ico">
     
      <link rel="canonical" href="https://akcent.rs/materijali.php" />
     

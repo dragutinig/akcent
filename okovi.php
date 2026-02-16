@@ -20,7 +20,7 @@
     Celokupan proces: 3D projektovanje, izrada i montaža na jednom mestu. Bez skrivenih troškova.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="manifest" href="site.webmanifest">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon" href="favicon.ico">
     
     <link rel="canonical" href="https://akcent.rs/okovi.php" />
     

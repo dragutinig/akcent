@@ -19,7 +19,7 @@
     <meta name="description" content="Pogledajte galeriju naših projekata. Kuhinje i plakari po meri kvalitetne izrade, sa najboljim okovima. Bez skrivenih troskova.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="manifest" href="site.webmanifest">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon" href="favicon.ico">
     
     <link rel="canonical" href="https://akcent.rs/namestaj-po-meri-galerija.php" />
     

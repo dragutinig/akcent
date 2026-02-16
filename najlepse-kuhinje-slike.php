@@ -21,10 +21,10 @@
     <meta name="description" content="Otkrijte najlepše kuhinje kroz inspirativne slike modernih, klasičnih i luksuznih kuhinjskih rešenja. 
     Pronađite savršen dizajn za vaš dom.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="canonical" href="https://akcent.rs/najlepse-slike-kuhinja.php" />
+    <link rel="canonical" href="https://akcent.rs/najlepse-kuhinje-slike.php" />
 
     <link rel="manifest" href="site.webmanifest">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon" href="favicon.ico">
     <!-- Place favicon.ico in the root directory -->
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"

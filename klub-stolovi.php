@@ -19,10 +19,10 @@
     <title>Klub stolovi - Nameštaj po meri Pančevo, Beograd, Zemun</title>
     <meta name="description" content="Klub stolovi i drugi nameštaj po meri po meri za moderan enterijer. Kvalitetni materijali i završna obrada. Pristupačne i transparentne cene.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="canonical" href="https://akcent.rs/kuhinje-po-meri.php" />
+    <link rel="canonical" href="https://akcent.rs/klub-stolovi.php" />
 
     <link rel="manifest" href="site.webmanifest">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon" href="favicon.ico">
     <!-- Place favicon.ico in the root directory -->
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -153,7 +153,7 @@
                      <div class="row mt-5">
                         <div class="col-sm-4 col-10 buttonDiv">
                             <button type="button" class="button-37  col-12 btn  btn-warning btn-lg  col-4" role="button"
-                                onclick="window.location.href='kontaktirajte.php'">Kontaktirajte nas
+                                onclick="window.location.href='kontakt.php'">Kontaktirajte nas
                             </button>
                         </div>
                     </div>
