@@ -1,39 +1,35 @@
 <?php
-
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-
 require_once 'Database.php';
 require_once 'config.php';
 
+$requestUri = $_SERVER['REQUEST_URI'] ?? '';
 
-$requestUri = $_SERVER['REQUEST_URI'];
-
-// Ekstrakcija "category" i "slug"
-if (isset($_GET['category']) && isset($_GET['slug'])) {
-    $categorySlug = $_GET['category'];
-    $postSlug = $_GET['slug'];
-} elseif (preg_match('#(?:^|/)blog/([^/]+)/([^/]+)/?$#', parse_url($requestUri, PHP_URL_PATH), $matches)) {
+if (isset($_GET['category'], $_GET['slug'])) {
+    $categorySlug = trim((string) $_GET['category']);
+    $postSlug = trim((string) $_GET['slug']);
+} elseif (preg_match('#(?:^|/)blog/([^/]+)/([^/]+)/?$#', parse_url($requestUri, PHP_URL_PATH) ?: '', $matches)) {
     $categorySlug = $matches[1];
     $postSlug = $matches[2];
 } else {
-    die("Invalid URL format.");
+    http_response_code(400);
+    exit('Invalid URL format.');
 }
 
 $db = new Database();
 $conn = $db->connect();
 
 if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
+    http_response_code(500);
+    exit('Connection failed.');
 }
 
-// Upit za postove
-$postQuery = "
-    SELECT posts.title, posts.content, posts.featured_image, posts.published_at, categories.name AS category_name,posts.meta_title,
-           posts.meta_description, posts.slug AS post_slug, categories.slug AS category_slug
+$hasPostComments = false;
+$commentsTableCheck = $conn->query("SHOW TABLES LIKE 'post_comments'");
+if ($commentsTableCheck && $commentsTableCheck->num_rows > 0) {
+    $hasPostComments = true;
+}
+$postQuery = "SELECT posts.id, posts.title, posts.content, posts.featured_image, posts.published_at, categories.name AS category_name,
+           posts.meta_title, posts.meta_description, posts.slug AS post_slug, categories.slug AS category_slug
     FROM posts
     JOIN categories ON posts.category_id = categories.id
     WHERE posts.slug = ? AND categories.slug = ? AND posts.status = 'published'";
@@ -44,13 +40,47 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    die("Post not found.");
+    http_response_code(404);
+    exit('Post not found.');
 }
 
 $post = $result->fetch_assoc();
+$postId = (int) $post['id'];
 
+$flash = '';
+if ($hasPostComments && $_SERVER['REQUEST_METHOD'] === 'POST' && (($_POST['action'] ?? '') === 'add_comment')) {
+    start_secure_session();
+    $name = trim((string) ($_POST['name'] ?? ''));
+    $email = trim((string) ($_POST['email'] ?? ''));
+    $comment = trim((string) ($_POST['comment'] ?? ''));
+    $website = trim((string) ($_POST['website'] ?? ''));
 
-$relatedStmt = $conn->prepare("SELECT posts.title, posts.slug, categories.slug AS category_slug
+    if ($website !== '') {
+        $flash = 'Komentar nije sačuvan.';
+    } elseif ($name === '' || $comment === '') {
+        $flash = 'Popuni ime i komentar.';
+    } else {
+        $rateKey = 'post_comment_' . $postId;
+        $last = (int) ($_SESSION[$rateKey] ?? 0);
+        if (time() - $last < 20) {
+            $flash = 'Sačekaj malo pre narednog komentara.';
+        } else {
+            $insert = $conn->prepare('INSERT INTO post_comments (post_id, author_name, author_email, comment_text, status, ip_address, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?)');
+            $status = 'approved';
+            $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+            $ua = mb_substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255);
+            $author = mb_substr($name, 0, 120);
+            $authorEmail = mb_substr($email, 0, 190);
+            $commentText = mb_substr($comment, 0, 1500);
+            $insert->bind_param('issssss', $postId, $author, $authorEmail, $commentText, $status, $ip, $ua);
+            $insert->execute();
+            $_SESSION[$rateKey] = time();
+            $flash = 'Komentar je objavljen.';
+        }
+    }
+}
+
+$relatedStmt = $conn->prepare("SELECT posts.title, posts.slug, posts.featured_image, posts.content, categories.slug AS category_slug
     FROM posts
     JOIN categories ON posts.category_id = categories.id
     WHERE posts.status = 'published' AND categories.slug = ? AND posts.slug <> ?
@@ -64,135 +94,123 @@ while ($row = $relatedResult->fetch_assoc()) {
     $relatedPosts[] = $row;
 }
 
-// Upit za tagove povezane sa postom
-$tagsQuery = "
-    SELECT tags.name
+$tagsQuery = "SELECT tags.name
     FROM tags
     JOIN posttags ON tags.id = posttags.tag_id
-    WHERE posttags.post_id = (SELECT id FROM posts WHERE slug = ?)";
-
+    WHERE posttags.post_id = ?";
 $tagsStmt = $conn->prepare($tagsQuery);
-$tagsStmt->bind_param('s', $postSlug);
+$tagsStmt->bind_param('i', $postId);
 $tagsStmt->execute();
 $tagsResult = $tagsStmt->get_result();
-
 $tags = [];
 while ($tag = $tagsResult->fetch_assoc()) {
     $tags[] = $tag['name'];
 }
 $tagsString = implode(', ', $tags);
 
+$comments = [];
+if ($hasPostComments) {
+    $commentsStmt = $conn->prepare('SELECT author_name, comment_text, created_at FROM post_comments WHERE post_id = ? AND status = "approved" ORDER BY created_at DESC LIMIT 30');
+    $commentsStmt->bind_param('i', $postId);
+    $commentsStmt->execute();
+    $commentsRes = $commentsStmt->get_result();
+    while ($c = $commentsRes->fetch_assoc()) {
+        $comments[] = $c;
+    }
+}
 
-$relativePath = $post['featured_image'];
-$absolutePath = resolveImageUrl($relativePath);
+$absolutePath = resolveImageUrl((string) $post['featured_image']);
 ?>
-
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="sr">
-
 <head>
-     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-     integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-     <!-- Google tag (gtag.js) -->
-     <script async src="https://www.googletagmanager.com/gtag/js?id=G-HDLXHWERJK"></script>
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-         <script>
-         window.dataLayer = window.dataLayer || [];
-         function gtag(){dataLayer.push(arguments);}
-         gtag('js', new Date());
-         gtag('config', 'G-HDLXHWERJK');
-        </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HDLXHWERJK"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);} 
+        gtag('js', new Date());
+        gtag('config', 'G-HDLXHWERJK');
+    </script>
     <meta charset="UTF-8">
     <title><?php echo htmlspecialchars($post['meta_title']); ?></title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/share.css">
     <link rel="stylesheet" href="../css/template.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Canonical Link -->
     <link rel="canonical" href="<?php echo htmlspecialchars(getBlogBaseUrl()); ?>/<?php echo htmlspecialchars($categorySlug); ?>/<?php echo htmlspecialchars($postSlug); ?>" />
-    <!-- Meta Description -->
     <meta name="description" content="<?php echo htmlspecialchars($post['meta_description']); ?>">
-    <!-- Meta Keywords (tags) -->
     <meta name="keywords" content="<?php echo htmlspecialchars($tagsString); ?>">
-<meta property="og:title" content="<?php echo htmlspecialchars($post['meta_title']); ?>">
-<meta property="og:description" content="<?php echo htmlspecialchars($post['meta_description']); ?>">
-<meta property="og:image" content="<?php echo htmlspecialchars($absolutePath); ?>">
-<meta property="og:url" content="<?php echo htmlspecialchars(getBlogBaseUrl() . "/" . $categorySlug . "/" . $postSlug); ?>">
-<meta name="twitter:card" content="summary_large_image">
-
-    <script src="<?php echo htmlspecialchars(getBlogBasePath()); ?>/js/share.js"></script>
-    <script src="<?php echo htmlspecialchars(getBlogBasePath()); ?>/js/main.js"></script>
-         <style>
-             footer {
-               background-color: black;
-             }
-         </style>
-
+    <meta property="og:title" content="<?php echo htmlspecialchars($post['meta_title']); ?>">
+    <meta property="og:description" content="<?php echo htmlspecialchars($post['meta_description']); ?>">
+    <meta property="og:image" content="<?php echo htmlspecialchars($absolutePath); ?>">
+    <meta property="og:url" content="<?php echo htmlspecialchars(getBlogBaseUrl() . '/' . $categorySlug . '/' . $postSlug); ?>">
+    <meta name="twitter:card" content="summary_large_image">
+    <style>
+        .recommended-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-top:10px; }
+        .recommended-card { border:1px solid #e5e7eb; background:#fff; border-radius:10px; overflow:hidden; }
+        .recommended-card img { width:100%; height:130px; object-fit:cover; }
+        .recommended-card .body { padding:10px; }
+        .recommended-card h3 { font-size:1rem; margin:0 0 8px; color:#111827; }
+        .recommended-card p { margin:0; color:#4b5563; font-size:.9rem; line-height:1.4; }
+        .blog-comments { margin-top:24px; border-top:1px solid #e5e7eb; padding-top:18px; }
+        .blog-comment-item { border:1px solid #e5e7eb; border-radius:8px; padding:10px; margin-bottom:8px; background:#fff; }
+        footer { background-color:black; }
+    </style>
 </head>
-
 <body>
-    <!-- Header -->
-    <?php include 'header.php'; ?>
+<?php include 'header.php'; ?>
+<article>
+    <h1><?php echo htmlspecialchars($post['title']); ?></h1>
+    <p class="published-at"><?php echo date('F j, Y', strtotime($post['published_at'])); ?></p>
+    <div class="post-content"><?php echo $post['content']; ?></div>
 
-    <!-- Post Content -->
-    <article>
-        <h1><?php echo htmlspecialchars($post['title']); ?></h1>
-        <p class="published-at"><?php echo date("F j, Y", strtotime($post['published_at'])); ?></p>
-        <div class="post-content">
-            <?php echo $post['content']; ?>
+    <?php if (!empty($relatedPosts)): ?>
+    <section style="margin-top:26px; border-top:1px solid #e5e7eb; padding-top:20px;">
+        <h2 style="font-size:1.3rem; margin-bottom:10px;">Preporučeni blogovi</h2>
+        <div class="recommended-grid">
+            <?php foreach ($relatedPosts as $rp): ?>
+                <a class="recommended-card" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/<?php echo htmlspecialchars($rp['category_slug']); ?>/<?php echo htmlspecialchars($rp['slug']); ?>">
+                    <img src="<?php echo htmlspecialchars(resolveImageUrl((string) ($rp['featured_image'] ?? ''))); ?>" alt="<?php echo htmlspecialchars($rp['title']); ?>">
+                    <div class="body">
+                        <h3><?php echo htmlspecialchars($rp['title']); ?></h3>
+                        <p><?php echo htmlspecialchars(mb_substr(trim(strip_tags((string) $rp['content'])), 0, 110)); ?>...</p>
+                    </div>
+                </a>
+            <?php endforeach; ?>
         </div>
-        
-        
-                    <?php if (!empty($relatedPosts)): ?>
-                    <section style="margin-top:26px; border-top:1px solid #e5e7eb; padding-top:20px;">
-                        <h2 style="font-size:1.3rem; margin-bottom:10px;">Pročitaj i ovo</h2>
-                        <ul>
-                            <?php foreach ($relatedPosts as $rp): ?>
-                                <li><a href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/<?php echo htmlspecialchars($rp['category_slug']); ?>/<?php echo htmlspecialchars($rp['slug']); ?>"><?php echo htmlspecialchars($rp['title']); ?></a></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </section>
-                    <?php endif; ?>
+    </section>
+    <?php endif; ?>
 
-                    <div class="col-5 col-sm-4"> <a href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/"
-                            class="button-37 col-12  btn btn-secondary btn-lg" style="color:#fff !important; font-size:1rem; margin-top:20px">Nazad na blog</a></div>
-    </article>
+    <section class="blog-comments">
+        <h2>Komentari</h2>
+        <?php if (!$hasPostComments): ?><div class="alert alert-warning">Komentari trenutno nisu dostupni dok se ne pokrene DB migracija.</div><?php endif; ?>
+        <?php if ($flash): ?><div class="alert alert-info"><?php echo htmlspecialchars($flash, ENT_QUOTES, 'UTF-8'); ?></div><?php endif; ?>
+        <?php foreach ($comments as $c): ?>
+            <div class="blog-comment-item">
+                <strong><?php echo htmlspecialchars($c['author_name'], ENT_QUOTES, 'UTF-8'); ?></strong>
+                <small class="published-at"><?php echo htmlspecialchars(date('d.m.Y H:i', strtotime($c['created_at']))); ?></small>
+                <p class="mb-0"><?php echo nl2br(htmlspecialchars($c['comment_text'], ENT_QUOTES, 'UTF-8')); ?></p>
+            </div>
+        <?php endforeach; ?>
 
-    <!-- Footer -->
-     <?php include("../../komponente/cookie-banner.php"); ?>
-    <?php include '../../komponente/footer.php'; ?>
-    
-<div class="floating-share-button">
-    <button id="shareBtn">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" width="40" height="40" fill="none">
-            <g style="stroke:white;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-width:3">
-                <circle cx="50" cy="22" r="7"/> 
-                <circle cx="22" cy="38" r="7"/> 
-                <circle cx="50" cy="50" r="7"/> 
-                <path d="m27 40 18 8"/> 
-                <path d="m45 25-18 12"/> 
-            </g>
-        </svg>
-    </button>
-</div>
+        <?php if ($hasPostComments): ?>
+        <form method="post">
+            <input type="hidden" name="action" value="add_comment">
+            <input type="text" name="website" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;">
+            <div class="row g-2">
+                <div class="col-md-6"><input class="form-control" name="name" placeholder="Ime" required></div>
+                <div class="col-md-6"><input class="form-control" type="email" name="email" placeholder="Email (opciono)"></div>
+                <div class="col-12"><textarea class="form-control" name="comment" rows="4" placeholder="Komentar" required></textarea></div>
+                <div class="col-12"><button class="btn btn-primary" type="submit">Pošalji komentar</button></div>
+            </div>
+        </form>
+        <?php endif; ?>
+    </section>
+</article>
 
-
-
-
-
-
+<?php include('../../komponente/cookie-banner.php'); ?>
+<?php include '../../komponente/footer.php'; ?>
 </body>
-
 </html>
-
-<?php
-// Zatvaranje konekcije
-$conn->close();
-?>
-
+<?php $conn->close(); ?>

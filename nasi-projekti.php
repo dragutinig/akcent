@@ -7,6 +7,52 @@ $db = (new Database())->connect();
 $repo = new ProjectRepository($db);
 $repo->ensureSchema();
 $projects = $repo->listProjects('published');
+
+function resolveProjectAssetUrl(string $rawPath): string
+{
+    $rawPath = trim($rawPath);
+    if ($rawPath === '') {
+        return '';
+    }
+
+    if (preg_match('#^https?://#i', $rawPath)) {
+        return $rawPath;
+    }
+
+    $normalized = str_replace('\\', '/', $rawPath);
+
+    if (strpos($normalized, 'blog/') === 0) {
+        return getSiteBaseUrl() . '/' . str_replace(' ', '%20', ltrim($normalized, '/'));
+    }
+
+    if (strpos($normalized, 'uploads/') === 0 || strpos($normalized, '../uploads/') === 0) {
+        $normalized = ltrim(str_replace('../', '', $normalized), '/');
+        return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $normalized);
+    }
+
+    $uploadsMarker = '/blog/uploads/projects/';
+    $pos = strpos($normalized, $uploadsMarker);
+    if ($pos !== false) {
+        $relative = substr($normalized, $pos + 1);
+        return getSiteBaseUrl() . '/' . str_replace(' ', '%20', $relative);
+    }
+
+    $projectsMarker = 'uploads/projects/';
+    $pos2 = strpos($normalized, $projectsMarker);
+    if ($pos2 !== false) {
+        $relative = substr($normalized, $pos2);
+        return getSiteBaseUrl() . '/blog/' . str_replace(' ', '%20', $relative);
+    }
+
+    if (preg_match('#^[A-Za-z]:/#', $normalized) || strpos($normalized, '/') === 0) {
+        $file = basename($normalized);
+        if ($file !== '') {
+            return getSiteBaseUrl() . '/blog/uploads/projects/' . rawurlencode($file);
+        }
+    }
+
+    return getSiteBaseUrl() . '/' . str_replace(' ', '%20', ltrim($normalized, '/'));
+}
 ?>
 <!doctype html>
 <html class="no-js" lang="sr">
@@ -27,16 +73,15 @@ $projects = $repo->listProjects('published');
 <div style="height:50px;"></div>
 <main class="projects-shell">
     <h1 class="projects-title">Naši projekti</h1>
-    <p class="projects-subtitle">Tabela / kartice sa projektima: slika, naslov i datum.</p>
 
     <section class="projects-grid">
         <?php foreach ($projects as $project):
             $cover = $project['images'][0]['image_path'] ?? '';
-            $coverUrl = $cover !== '' ? getSiteBaseUrl() . '/' . ltrim(str_replace(' ', '%20', $cover), '/') : '';
+            $coverUrl = resolveProjectAssetUrl((string) $cover);
         ?>
         <article class="project-card">
             <?php if ($coverUrl !== ''): ?>
-                <img src="<?php echo htmlspecialchars($coverUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>">
+                <img src="<?php echo htmlspecialchars($coverUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>" loading="lazy">
             <?php endif; ?>
             <div class="project-card-content">
                 <div class="project-date"><?php echo htmlspecialchars(date('d.m.Y', strtotime($project['created_at']))); ?></div>
