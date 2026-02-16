@@ -1,6 +1,7 @@
 <?php
 // Učitavanje klase Database
 require_once 'Database.php';
+require_once 'config.php';
 
 // Kreiranje objekta baze i povezivanje
 $db = new Database();
@@ -57,16 +58,16 @@ if (!$posts) {
   gtag('config', 'G-HDLXHWERJK');
 </script>
 
-     <link rel="canonical" href="https://akcent.rs/blog/<?php echo $category_slug; ?>" />
+     <link rel="canonical" href="<?php echo htmlspecialchars(getBlogBaseUrl()); ?>/<?php echo $category_slug; ?>" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($category_name); ?></title>
-    <link rel="stylesheet" href="/blog/css/style.css">
-    <link rel="stylesheet" href="/blog/css/post.css">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/css/style.css">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/css/post.css">
      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="/blog/js/main.js"></script>
+        <script src="<?php echo htmlspecialchars(getBlogBasePath()); ?>/js/main.js"></script>
         
        <style>
         footer {
@@ -89,10 +90,10 @@ if (!$posts) {
             <?php if ($posts->num_rows > 0): ?>
                 <?php while ($post = $posts->fetch_assoc()): ?>
                     <div class="post">
-                        <a href="/blog/<?php echo $post['category_slug']; ?>/<?php echo $post['slug']; ?>"
+                        <a href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/<?php echo $post['category_slug']; ?>/<?php echo $post['slug']; ?>"
                             class="post-link">
                             <div class="post-thumbnail-container">
-                                <img src="/blog/uploads/<?php echo $post['featured_image']; ?>"
+                                <img src="<?php echo htmlspecialchars(getBlogBasePath()); ?>/uploads/<?php echo $post['featured_image']; ?>"
                                     alt="<?php echo htmlspecialchars($post['title']); ?>">
                                 <div class="badge-row">
                                     <span class="badge-item post-primary-category text-decoration-none">
