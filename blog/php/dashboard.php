@@ -58,6 +58,7 @@ $current = 'dashboard';
                 <?php if ($latestPostId > 0): ?><a class="btn btn-secondary" href="edit_post.php?post_id=<?= $latestPostId; ?>">Poslednji post</a><?php endif; ?>
                 <a class="btn btn-secondary" href="../" target="_blank">Otvori blog</a>
                 <a class="btn btn-secondary" href="<?= admin_esc(getBlogBasePath()); ?>/admin" target="_blank">Admin URL</a>
+                <a class="btn btn-secondary" href="<?= admin_esc(getSiteBaseUrl()); ?>/gotovi-projekti.php" target="_blank">Stranica gotovih projekata</a>
             </section>
 
             <section class="section">
@@ -90,6 +91,7 @@ $current = 'dashboard';
                                 <td><?= admin_esc($p['creator']); ?></td>
                                 <td>
                                     <a class="btn btn-info btn-sm" href="edit_post.php?post_id=<?= (int)$p['id']; ?>">Izmeni</a>
+                                    <a class="btn btn-secondary btn-sm" target="_blank" href="preview.php?post_id=<?= (int)$p['id']; ?>">Preview</a>
                                     <a class="btn btn-danger btn-sm" href="delete_post.php?id=<?= (int)$p['id']; ?>" onclick="return confirm('Obrisati post?');">Obriši</a>
                                 </td>
                             </tr>
