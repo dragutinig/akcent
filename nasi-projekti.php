@@ -27,7 +27,7 @@ $projects = $repo->listProjects('published');
 <div style="height:50px;"></div>
 <main class="projects-shell">
     <h1 class="projects-title">Naši projekti</h1>
-    <p class="projects-subtitle">Tabela / kartice sa projektima: slika, naslov i datum.</p>
+    <p class="projects-subtitle">Izaberite projekat i pogledajte fotografije, opis i 3D prikaz rešenja.</p>
 
     <section class="projects-grid">
         <?php foreach ($projects as $project):

@@ -302,3 +302,15 @@ textarea {
     background-color: #45a049;
 }
 
+
+.akcent-site-footer {
+  background-color: #000 !important;
+  color: #fff;
+}
+
+.akcent-site-footer .table,
+.akcent-site-footer .table td,
+.akcent-site-footer .table th,
+.akcent-site-footer a {
+  color: #fff !important;
+}

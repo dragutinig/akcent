@@ -49,6 +49,12 @@ $metaDescription = trim((string) ($post['meta_description'] ?? ''));
     <link rel="stylesheet" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/css/template.css">
     <link rel="stylesheet" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/css/share.css">
     <script src="<?php echo htmlspecialchars(getBlogBasePath()); ?>/js/main.js"></script>
+    <style>
+        article{max-width:980px;margin:24px auto;background:#fff;border-radius:0;box-shadow:none;padding:20px 24px;}
+        article h1{border:0;padding:0;margin:0 0 16px;font-size:48px;line-height:1.12;box-shadow:none;background:transparent;}
+        .published-at{margin-bottom:24px;}
+        .akcent-site-footer{background:#000 !important;color:#fff !important;}
+    </style>
 </head>
 <body>
 <?php include 'header.php'; ?>
