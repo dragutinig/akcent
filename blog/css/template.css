@@ -14,14 +14,6 @@ h1, h2, h3 {
     color: #2c3e50;
 }
 
-.container {
-    width: 100%;
-    max-width: 90ch; /* Ensures the content width is limited to 90 characters */
-    margin: 0 auto; /* Centers the content */
-    padding: 0 20px; /* Adds some padding for better spacing */
-   
-}
-
 /* Article Styles */
 article {
     background-color: #ffffff;
@@ -32,7 +24,7 @@ article {
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: left; /* Text is aligned to the left */
+    text-align: left;
 }
 
 article h1 {
@@ -87,26 +79,6 @@ article a {
 
 article a:hover {
     color: #c0392b;
-}
-
-/* Footer Styles */
-footer.main-footer {
-    background-color: #34495e;
-    color: #ecf0f1;
-    text-align: center;
-    padding: 20px 0;
-    margin-top: 20px;
-}
-
-footer.main-footer .social-links a {
-    color: #ecf0f1;
-    margin: 0 10px;
-    text-decoration: none;
-    font-size: 16px;
-}
-
-footer.main-footer .social-links a:hover {
-    color: #e74c3c;
 }
 
 /* Responsive Design */

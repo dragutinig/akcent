@@ -629,12 +629,15 @@ article > .col-5 {
 }
 
 article h1 {
-    text-align: left;
+    text-align: center;
     overflow-wrap: anywhere;
+    line-height: 1.2;
 }
 
 .article-body {
     text-align: left;
+    font-size: 1.15rem;
+    line-height: 1.8;
 }
 
 .article-body p,
@@ -643,6 +646,37 @@ article h1 {
 .article-body ul,
 .article-body ol {
     max-width: 100%;
+}
+
+.blog-article-header {
+    margin-bottom: 20px;
+}
+
+.related-posts-section {
+    margin-top: 32px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 24px;
+    width: 100%;
+}
+
+.related-posts-section h2 {
+    font-size: 1.45rem;
+    margin-bottom: 16px;
+    text-align: left;
+}
+
+.related-posts-grid {
+    gap: 24px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.akcent-site-footer {
+    margin-top: 40px;
+}
+
+.akcent-site-footer .container {
+    width: 100%;
+    max-width: 1320px;
 }
 
 @media (max-width: 1200px) {
@@ -663,6 +697,10 @@ article h1 {
     .main-header .logo {
         display: none;
     }
+
+    .related-posts-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 768px) {
@@ -678,5 +716,9 @@ article h1 {
 
     .main-header .nazad img {
         max-height: 36px;
+    }
+
+    .related-posts-grid {
+        grid-template-columns: 1fr;
     }
 }

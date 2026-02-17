@@ -85,6 +85,12 @@ while ($tag = $tagsResult->fetch_assoc()) {
 $tagsString = implode(', ', $tags);
 
 $absolutePath = resolveImageUrl((string) $post['featured_image']);
+$publishedIso = date('c', strtotime((string) $post['published_at']));
+$publishedHuman = date('F j, Y', strtotime((string) $post['published_at']));
+$articleDescription = trim((string) ($post['meta_description'] ?? ''));
+if ($articleDescription === '') {
+    $articleDescription = mb_substr(trim(strip_tags((string) $post['content'])), 0, 180);
+}
 ?>
 <!DOCTYPE html>
 <html lang="sr">
@@ -108,24 +114,55 @@ $absolutePath = resolveImageUrl((string) $post['featured_image']);
     <meta name="keywords" content="<?php echo htmlspecialchars($tagsString); ?>">
     <meta property="og:title" content="<?php echo htmlspecialchars($post['meta_title']); ?>">
     <meta property="og:description" content="<?php echo htmlspecialchars($post['meta_description']); ?>">
+    <meta property="og:type" content="article">
     <meta property="og:image" content="<?php echo htmlspecialchars($absolutePath); ?>">
     <meta property="og:url" content="<?php echo htmlspecialchars(getBlogBaseUrl() . '/' . $categorySlug . '/' . $postSlug); ?>">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="robots" content="index,follow,max-image-preview:large">
+
+    <script type="application/ld+json">
+    <?php echo json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'BlogPosting',
+        'headline' => (string) $post['title'],
+        'description' => $articleDescription,
+        'datePublished' => $publishedIso,
+        'dateModified' => $publishedIso,
+        'mainEntityOfPage' => [
+            '@type' => 'WebPage',
+            '@id' => getBlogBaseUrl() . '/' . $categorySlug . '/' . $postSlug,
+        ],
+        'image' => [$absolutePath],
+        'articleSection' => (string) ($post['category_name'] ?? ''),
+        'publisher' => [
+            '@type' => 'Organization',
+            'name' => 'Akcent Nameštaj',
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => getSiteBaseUrl() . '/img/akcent-namestaj-logo.png',
+            ],
+        ],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>
+    </script>
 
     <script src="<?php echo htmlspecialchars(getBlogBasePath()); ?>/js/share.js"></script>
     <script src="<?php echo htmlspecialchars(getBlogBasePath()); ?>/js/main.js"></script>
+    <link rel="stylesheet" href="../../css/main.css">
 </head>
 <body>
 <?php include 'header.php'; ?>
-<article>
-    <h1><?php echo htmlspecialchars($post['title']); ?></h1>
-    <p class="published-at"><?php echo date('F j, Y', strtotime($post['published_at'])); ?></p>
+<main class="blog-post-page" id="main-content">
+<article class="blog-article">
+    <header class="blog-article-header">
+        <h1><?php echo htmlspecialchars($post['title']); ?></h1>
+        <p class="published-at"><time datetime="<?php echo htmlspecialchars($publishedIso); ?>"><?php echo htmlspecialchars($publishedHuman); ?></time></p>
+    </header>
     <div class="article-body"><?php echo $post['content']; ?></div>
 
     <?php if (!empty($relatedPosts)): ?>
-    <section style="margin-top:26px; border-top:1px solid #e5e7eb; padding-top:20px; width:100%;">
-        <h2 style="font-size:1.3rem; margin-bottom:10px;">Pročitaj i ovo</h2>
-        <div class="post-grid related-posts-grid" style="gap:24px; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));">
+    <section class="related-posts-section" aria-label="Povezani blog postovi">
+        <h2>Pročitaj i ovo</h2>
+        <div class="post-grid related-posts-grid">
             <?php foreach ($relatedPosts as $rp): ?>
                 <div class="post">
                     <a href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/<?php echo htmlspecialchars($rp['category_slug']); ?>/<?php echo htmlspecialchars($rp['slug']); ?>" class="post-link">
@@ -151,6 +188,7 @@ $absolutePath = resolveImageUrl((string) $post['featured_image']);
         <a href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/" class="button-37 col-12 btn btn-secondary btn-lg" style="color:#fff !important; font-size:1rem; margin-top:20px">Nazad na blog</a>
     </div>
 </article>
+</main>
 <?php include('../../komponente/cookie-banner.php'); ?>
 <?php include '../../komponente/footer.php'; ?>
 
