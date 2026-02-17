@@ -1,6 +1,6 @@
 /* General Styles */
 body {
-    font-family: 'Roboto', Arial, sans-serif;
+    font-family: 'Inter', Arial, sans-serif;
     line-height: 1.6;
     color: #333;
     margin: 0;
@@ -10,16 +10,8 @@ body {
 }
 
 h1, h2, h3 {
-    font-family: 'Poppins', Arial, sans-serif;
+    font-family: 'Inter', Arial, sans-serif;
     color: #2c3e50;
-}
-
-.container {
-    width: 100%;
-    max-width: 90ch; /* Ensures the content width is limited to 90 characters */
-    margin: 0 auto; /* Centers the content */
-    padding: 0 20px; /* Adds some padding for better spacing */
-   
 }
 
 /* Article Styles */
@@ -32,7 +24,7 @@ article {
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: left; /* Text is aligned to the left */
+    text-align: left;
 }
 
 article h1 {
@@ -41,6 +33,8 @@ article h1 {
     color: #34495e;
     text-align: center;
     max-width: 90ch;
+    width: 100%;
+    overflow-wrap: anywhere;
     margin-left: auto;
     margin-right: auto;
 }
@@ -64,8 +58,8 @@ article h2 {
 article p {
     font-size: 16px;
     margin: 15px 0;
-    text-align: justify;
-    max-width: 90ch; /* Limits width to 90 characters per line */
+    text-align: left;
+    max-width: 90ch;
 }
 
 article img {
@@ -85,26 +79,6 @@ article a {
 
 article a:hover {
     color: #c0392b;
-}
-
-/* Footer Styles */
-footer.main-footer {
-    background-color: #34495e;
-    color: #ecf0f1;
-    text-align: center;
-    padding: 20px 0;
-    margin-top: 20px;
-}
-
-footer.main-footer .social-links a {
-    color: #ecf0f1;
-    margin: 0 10px;
-    text-decoration: none;
-    font-size: 16px;
-}
-
-footer.main-footer .social-links a:hover {
-    color: #e74c3c;
 }
 
 /* Responsive Design */

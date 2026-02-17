@@ -102,8 +102,9 @@ if (!$posts) {
                                 </div>
                             </div>
                             <div class="post-content">
-                                <h2><?php echo htmlspecialchars($post['title']); ?></h2>
-                                <p><?php echo strip_tags(substr($post['content'], 0, 300)); ?>...</p>
+                                <h3><?php echo htmlspecialchars($post['title']); ?></h3>
+                                <?php $excerpt = trim(strip_tags((string) $post['content'])); ?>
+                                <p><?php echo htmlspecialchars($excerpt !== '' ? mb_substr($excerpt, 0, 180) : 'Pročitajte ceo tekst i saznajte više.'); ?></p>
                             </div>
                         </a>
                     </div>

@@ -8,14 +8,31 @@ $db = new Database();
 $conn = $db->connect();
 
 // SQL upit za postove
-$postsQuery = "SELECT posts.id, posts.title, posts.slug, posts.content, posts.featured_image, posts.published_at, categories.slug AS category_slug
-               FROM posts 
-               JOIN categories ON posts.category_id = categories.id
-               WHERE posts.status = 'published' 
-               ORDER BY posts.published_at DESC 
-               LIMIT 10";
+$perPage = 12;
+$currentPage = max(1, (int) ($_GET['page'] ?? 1));
+$offset = ($currentPage - 1) * $perPage;
 
-$posts = $conn->query($postsQuery);
+$countQuery = "SELECT COUNT(*) AS total FROM posts WHERE status = 'published'";
+$countResult = $conn->query($countQuery);
+$totalPosts = $countResult ? (int) ($countResult->fetch_assoc()['total'] ?? 0) : 0;
+$totalPages = max(1, (int) ceil($totalPosts / $perPage));
+
+if ($currentPage > $totalPages) {
+    $currentPage = $totalPages;
+    $offset = ($currentPage - 1) * $perPage;
+}
+
+$postsQuery = "SELECT posts.id, posts.title, posts.slug, posts.content, posts.featured_image, posts.published_at, categories.slug AS category_slug
+               FROM posts
+               JOIN categories ON posts.category_id = categories.id
+               WHERE posts.status = 'published'
+               ORDER BY posts.published_at DESC
+               LIMIT ? OFFSET ?";
+
+$postsStmt = $conn->prepare($postsQuery);
+$postsStmt->bind_param('ii', $perPage, $offset);
+$postsStmt->execute();
+$posts = $postsStmt->get_result();
 
 if (!$posts) {
     die("Query failed: " . $conn->error);
@@ -97,13 +114,26 @@ if (!$posts) {
                         </div>
                     </div>
                     <div class="post-content">
-                        <h2><?php echo $post['title']; ?></h2>
-                        <p><?php echo strip_tags(substr($post['content'], 0, 300)); ?></p>
+                        <h3><?php echo htmlspecialchars($post['title']); ?></h3>
+                        <?php $excerpt = trim(strip_tags((string) $post['content'])); ?>
+                        <p><?php echo htmlspecialchars($excerpt !== '' ? mb_substr($excerpt, 0, 180) : 'Pročitajte ceo tekst i saznajte više.'); ?></p>
                     </div>
                 </a>
             </div>
             <?php endwhile; ?>
         </div>
+
+        <?php if ($totalPages > 1): ?>
+            <div class="pagination-wrap">
+                <nav class="blog-pagination" aria-label="Paginacija blog postova">
+                    <?php for ($page = 1; $page <= $totalPages; $page++): ?>
+                        <a href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/?page=<?php echo $page; ?>"
+                           class="<?php echo $page === $currentPage ? 'is-active' : ''; ?>"
+                           aria-current="<?php echo $page === $currentPage ? 'page' : 'false'; ?>"><?php echo $page; ?></a>
+                    <?php endfor; ?>
+                </nav>
+            </div>
+        <?php endif; ?>
     </div>
 </section>
 
