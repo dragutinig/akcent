@@ -19,8 +19,7 @@ function rrmdir($dir)
     if (!is_dir($dir)) {
         return;
     }
-    $items = scandir($dir);
-    foreach ($items as $item) {
+    foreach (scandir($dir) as $item) {
         if ($item === '.' || $item === '..') {
             continue;
         }
@@ -55,6 +54,32 @@ function find_html_recursive($directoryAbs, $preferredName = '')
     return $fallback;
 }
 
+function normalize_date_value($value, $withTime = false)
+{
+    $value = trim((string) $value);
+    if ($value === '') {
+        return null;
+    }
+
+    $formats = $withTime
+        ? ['Y-m-d\TH:i', 'Y-m-d H:i', 'd.m.Y H:i', 'd/m/Y H:i', 'm/d/Y H:i']
+        : ['Y-m-d', 'd.m.Y', 'd/m/Y', 'm/d/Y'];
+
+    foreach ($formats as $format) {
+        $dt = DateTime::createFromFormat($format, $value);
+        if ($dt instanceof DateTime) {
+            return $withTime ? $dt->format('Y-m-d H:i:s') : $dt->format('Y-m-d');
+        }
+    }
+
+    $timestamp = strtotime($value);
+    if ($timestamp !== false) {
+        return $withTime ? date('Y-m-d H:i:s', $timestamp) : date('Y-m-d', $timestamp);
+    }
+
+    return null;
+}
+
 $message = '';
 $error = '';
 $edit = null;
@@ -75,8 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($modelPath !== '') {
                 $baseDirRel = explode('/', $modelPath);
                 if (count($baseDirRel) >= 3) {
-                    $folder = $baseDirRel[2];
-                    rrmdir($storageAbs . '/' . $folder);
+                    rrmdir($storageAbs . '/' . $baseDirRel[2]);
                 }
             }
             $message = '3D preview je obrisan.';
@@ -87,66 +111,114 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int) ($_POST['id'] ?? 0);
         $clientName = trim($_POST['client_name'] ?? '');
         $label = trim($_POST['model_label'] ?? '');
-        $reviewDate = trim($_POST['review_date'] ?? '');
-        $expiresAt = trim($_POST['expires_at'] ?? '');
+        $reviewDate = normalize_date_value($_POST['review_date'] ?? '', false);
+        $expiresAt = normalize_date_value($_POST['expires_at'] ?? '', true);
         $notes = trim($_POST['notes'] ?? '');
 
-        if ($clientName === '' || $label === '') {
-            $error = 'Ime klijenta i naziv modela su obavezni.';
-        } else {
-            $modelPath = trim($_POST['existing_model_path'] ?? '');
+        if ($clientName === '') {
+            $error = 'Ime klijenta je obavezno.';
+        }
 
-            if (isset($_FILES['model_archive']) && $_FILES['model_archive']['error'] === UPLOAD_ERR_OK) {
+        $uploadedModels = [];
+        if ($error === '' && isset($_FILES['model_archives']) && is_array($_FILES['model_archives']['name'])) {
+            $count = count($_FILES['model_archives']['name']);
+            for ($i = 0; $i < $count; $i++) {
+                $errCode = (int) ($_FILES['model_archives']['error'][$i] ?? UPLOAD_ERR_NO_FILE);
+                if ($errCode === UPLOAD_ERR_NO_FILE) {
+                    continue;
+                }
+                if ($errCode !== UPLOAD_ERR_OK) {
+                    $error = 'Greška pri upload-u ZIP fajla.';
+                    break;
+                }
+
+                $zipName = (string) ($_FILES['model_archives']['name'][$i] ?? 'model.zip');
+                if (strtolower(pathinfo($zipName, PATHINFO_EXTENSION)) !== 'zip') {
+                    $error = 'Dozvoljeni su samo ZIP fajlovi.';
+                    break;
+                }
                 if (!class_exists('ZipArchive')) {
                     $error = 'ZipArchive nije dostupna.';
-                } else {
-                    $tokenPart = bin2hex(random_bytes(6));
-                    $safeFolder = preg_replace('/[^a-z0-9-]+/i', '-', strtolower($label)) . '-' . $tokenPart;
-                    $dest = $storageAbs . '/' . $safeFolder;
-                    mkdir($dest, 0777, true);
-
-                    $zip = new ZipArchive();
-                    if ($zip->open($_FILES['model_archive']['tmp_name']) === true) {
-                        $zip->extractTo($dest);
-                        $zip->close();
-                        $entry = find_html_recursive($dest, preg_replace('/[^a-z0-9-]+/i', '-', strtolower($label)));
-                        if ($entry === '') {
-                            $error = 'U ZIP-u nije pronađen HTML fajl.';
-                        } else {
-                            $modelPath = $storageRel . '/' . $safeFolder . '/' . $entry;
-                        }
-                    } else {
-                        $error = 'Ne mogu da otvorim ZIP arhivu.';
-                    }
+                    break;
                 }
-            }
 
-            if ($error === '') {
+                $defaultLabel = preg_replace('/\.[^.]+$/', '', basename($zipName));
+                $itemLabel = trim((string) ($_POST['model_label'][$i] ?? ''));
+                if ($itemLabel === '') {
+                    $itemLabel = $defaultLabel !== '' ? $defaultLabel : '3D model';
+                }
+
+                $tokenPart = bin2hex(random_bytes(6));
+                $safeFolder = preg_replace('/[^a-z0-9-]+/i', '-', strtolower($itemLabel)) . '-' . $tokenPart;
+                $dest = $storageAbs . '/' . $safeFolder;
+                mkdir($dest, 0777, true);
+
+                $zip = new ZipArchive();
+                if ($zip->open((string) $_FILES['model_archives']['tmp_name'][$i]) !== true) {
+                    $error = 'Ne mogu da otvorim ZIP arhivu.';
+                    break;
+                }
+                $zip->extractTo($dest);
+                $zip->close();
+
+                $entry = find_html_recursive($dest, preg_replace('/[^a-z0-9-]+/i', '-', strtolower($itemLabel)));
+                if ($entry === '') {
+                    $error = 'U ZIP-u nije pronađen HTML fajl.';
+                    break;
+                }
+
+                $uploadedModels[] = [
+                    'model_label' => $itemLabel,
+                    'model_path' => $storageRel . '/' . $safeFolder . '/' . $entry,
+                ];
+            }
+        }
+
+        if ($error === '' && $reviewDate === null && trim((string) ($_POST['review_date'] ?? '')) !== '') {
+            $error = 'Datum nije u dobrom formatu.';
+        }
+        if ($error === '' && $expiresAt === null && trim((string) ($_POST['expires_at'] ?? '')) !== '') {
+            $error = 'Datum isteka nije u dobrom formatu.';
+        }
+
+        if ($error === '') {
+            if ($id > 0) {
+                $modelPath = trim($_POST['existing_model_path'] ?? '');
+                if (!empty($uploadedModels)) {
+                    $modelPath = $uploadedModels[0]['model_path'];
+                    $label = $uploadedModels[0]['model_label'];
+                }
                 if ($modelPath === '') {
                     $error = 'Dodaj ZIP model ili postojeću putanju modela.';
                 } else {
-                    if ($id > 0) {
-                        $repo->updateClientPreview($id, [
-                            'client_name' => $clientName,
-                            'model_label' => $label,
-                            'model_path' => $modelPath,
-                            'review_date' => $reviewDate !== '' ? $reviewDate : null,
-                            'expires_at' => $expiresAt !== '' ? $expiresAt : null,
-                            'notes' => $notes,
-                        ]);
-                        $message = '3D preview je ažuriran.';
-                    } else {
+                    $repo->updateClientPreview($id, [
+                        'client_name' => $clientName,
+                        'model_label' => $label !== '' ? $label : '3D model',
+                        'model_path' => $modelPath,
+                        'review_date' => $reviewDate,
+                        'expires_at' => $expiresAt,
+                        'notes' => $notes,
+                    ]);
+                    $message = '3D preview je ažuriran.';
+                }
+            } else {
+                if (empty($uploadedModels)) {
+                    $error = 'Dodaj barem jedan ZIP 3D model.';
+                } else {
+                    foreach ($uploadedModels as $model) {
                         $repo->createClientPreview([
                             'client_name' => $clientName,
-                            'model_label' => $label,
+                            'model_label' => $model['model_label'],
                             'preview_token' => bin2hex(random_bytes(16)),
-                            'model_path' => $modelPath,
-                            'review_date' => $reviewDate !== '' ? $reviewDate : null,
-                            'expires_at' => $expiresAt !== '' ? $expiresAt : null,
+                            'model_path' => $model['model_path'],
+                            'review_date' => $reviewDate,
+                            'expires_at' => $expiresAt,
                             'notes' => $notes,
                         ]);
-                        $message = '3D preview je kreiran.';
                     }
+                    $message = count($uploadedModels) > 1
+                        ? 'Kreirano je više 3D preview linkova.'
+                        : '3D preview je kreiran.';
                 }
             }
         }
@@ -163,6 +235,7 @@ $current = 'preview3d';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Preview 3D | Admin</title>
     <link rel="stylesheet" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/css/admin.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
 <main class="admin-shell">
@@ -187,10 +260,11 @@ $current = 'preview3d';
                     <input type="hidden" name="existing_model_path" value="<?= admin_esc((string) ($edit['model_path'] ?? '')); ?>">
 
                     <div class="form-group"><label>Ime i prezime klijenta</label><input name="client_name" required value="<?= admin_esc((string) ($edit['client_name'] ?? '')); ?>"></div>
-                    <div class="form-group"><label>Naziv modela</label><input name="model_label" required value="<?= admin_esc((string) ($edit['model_label'] ?? '')); ?>"></div>
-                    <div class="form-group"><label>Datum</label><input type="date" name="review_date" value="<?= admin_esc((string) ($edit['review_date'] ?? '')); ?>"></div>
-                    <div class="form-group"><label>Ističe (opciono)</label><input type="datetime-local" name="expires_at" value="<?= admin_esc(isset($edit['expires_at']) && $edit['expires_at'] ? str_replace(' ', 'T', substr($edit['expires_at'], 0, 16)) : ''); ?>"></div>
-                    <div class="form-group full"><label>ZIP 3D modela</label><input type="file" name="model_archive" accept=".zip"></div>
+                    <div class="form-group"><label>Naziv modela (za izmenu jednog modela)</label><input name="model_label" value="<?= admin_esc((string) ($edit['model_label'] ?? '')); ?>"></div>
+                    <div class="form-group"><label>Datum</label><input class="js-date" type="text" name="review_date" placeholder="dd.mm.gggg" value="<?= admin_esc((string) ($edit['review_date'] ?? '')); ?>"></div>
+                    <div class="form-group"><label>Ističe (opciono)</label><input class="js-datetime" type="text" name="expires_at" placeholder="dd.mm.gggg hh:mm" value="<?= admin_esc(isset($edit['expires_at']) && $edit['expires_at'] ? date('d.m.Y H:i', strtotime($edit['expires_at'])) : ''); ?>"></div>
+                    <div class="form-group full"><label>ZIP 3D modela (može više)</label><input id="model_archives" type="file" name="model_archives[]" accept=".zip" multiple></div>
+                    <div id="models-meta-wrap" class="form-group full"></div>
                     <div class="form-group full"><label>Napomena</label><textarea name="notes"><?= admin_esc((string) ($edit['notes'] ?? '')); ?></textarea></div>
                     <div class="form-group full"><button class="btn btn-primary" type="submit">Sačuvaj</button></div>
                 </form>
@@ -231,11 +305,35 @@ $current = 'preview3d';
         </section>
     </section>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
 function copyLink(id) {
-  var el = document.getElementById(id);
+  const el = document.getElementById(id);
   el.select();
   document.execCommand('copy');
+}
+
+flatpickr('.js-date', { dateFormat: 'd.m.Y', allowInput: true });
+flatpickr('.js-datetime', { enableTime: true, time_24hr: true, dateFormat: 'd.m.Y H:i', allowInput: true });
+
+const modelsInput = document.getElementById('model_archives');
+const modelsWrap = document.getElementById('models-meta-wrap');
+if (modelsInput && modelsWrap) {
+  modelsInput.addEventListener('change', function () {
+    modelsWrap.innerHTML = '';
+    Array.from(modelsInput.files).forEach((file, i) => {
+      const row = document.createElement('div');
+      row.className = 'form-group full';
+      row.style.border = '1px solid #334155';
+      row.style.padding = '10px';
+      row.style.borderRadius = '8px';
+      row.innerHTML = `<strong>${file.name}</strong>
+      <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px;">
+        <input type="text" name="model_label[${i}]" placeholder="Naziv 3D modela (auto: ${file.name.replace(/\.[^.]+$/, '')})">
+      </div>`;
+      modelsWrap.appendChild(row);
+    });
+  });
 }
 </script>
 </body>
