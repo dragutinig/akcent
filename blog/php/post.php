@@ -120,12 +120,12 @@ $absolutePath = resolveImageUrl((string) $post['featured_image']);
 <article>
     <h1><?php echo htmlspecialchars($post['title']); ?></h1>
     <p class="published-at"><?php echo date('F j, Y', strtotime($post['published_at'])); ?></p>
-    <div class="post-content"><?php echo $post['content']; ?></div>
+    <div class="article-body"><?php echo $post['content']; ?></div>
 
     <?php if (!empty($relatedPosts)): ?>
     <section style="margin-top:26px; border-top:1px solid #e5e7eb; padding-top:20px; width:100%;">
         <h2 style="font-size:1.3rem; margin-bottom:10px;">Pročitaj i ovo</h2>
-        <div class="post-grid" style="gap:24px; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));">
+        <div class="post-grid related-posts-grid" style="gap:24px; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));">
             <?php foreach ($relatedPosts as $rp): ?>
                 <div class="post">
                     <a href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/<?php echo htmlspecialchars($rp['category_slug']); ?>/<?php echo htmlspecialchars($rp['slug']); ?>" class="post-link">
@@ -137,7 +137,8 @@ $absolutePath = resolveImageUrl((string) $post['featured_image']);
                         </div>
                         <div class="post-content">
                             <h3><?php echo htmlspecialchars($rp['title']); ?></h3>
-                            <p><?php echo htmlspecialchars(mb_substr(strip_tags($rp['content']), 0, 140)); ?>...</p>
+                            <?php $relatedExcerpt = trim(strip_tags((string) $rp['content'])); ?>
+                            <p><?php echo htmlspecialchars($relatedExcerpt !== '' ? mb_substr($relatedExcerpt, 0, 180) : 'Pročitajte ceo tekst i saznajte više.'); ?></p>
                         </div>
                     </a>
                 </div>
