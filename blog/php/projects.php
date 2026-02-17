@@ -119,16 +119,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $modelLabels = $_POST['model_label'] ?? array();
             $modelsToSave = array();
-
-            $manualModelPath = trim($_POST['model_path'] ?? '');
-            $manualModelLabel = trim($_POST['manual_model_label'] ?? '');
-            if ($manualModelPath !== '') {
-                $modelsToSave[] = array(
-                    'model_label' => $manualModelLabel !== '' ? $manualModelLabel : '3D model',
-                    'model_path' => $manualModelPath,
-                );
-            }
-
             if (isset($_FILES['model_archives']) && is_array($_FILES['model_archives']['name'])) {
                 $countModels = count($_FILES['model_archives']['name']);
                 for ($i = 0; $i < $countModels; $i++) {
@@ -253,42 +243,76 @@ $current = 'projects';
             paste_as_text: true
         });
 
-        const input = document.getElementById('project_images');
-        const wrap = document.getElementById('images-meta-wrap');
-        input.addEventListener('change', function () {
-          wrap.innerHTML = '';
-          Array.from(input.files).forEach((file, i) => {
-            const row = document.createElement('div');
-            row.className = 'form-group full';
-            row.style.border = '1px solid #334155';
-            row.style.padding = '10px';
-            row.style.borderRadius = '8px';
-            row.innerHTML = `<strong>${file.name}</strong>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
-                <input type="text" name="image_alt[${i}]" placeholder="Alt (auto: ${file.name.replace(/\.[^.]+$/, '')})">
-                <input type="text" name="image_title[${i}]" placeholder="Title (auto: ${file.name.replace(/\.[^.]+$/, '')})">
-              </div>`;
-            wrap.appendChild(row);
-          });
-        });
+        function createMetaRow(html) {
+          const row = document.createElement('div');
+          row.className = 'form-group full';
+          row.style.border = '1px solid #334155';
+          row.style.padding = '10px';
+          row.style.borderRadius = '8px';
+          row.innerHTML = html;
+          return row;
+        }
 
-        const modelsInput = document.getElementById('model_archives');
-        const modelsWrap = document.getElementById('models-meta-wrap');
-        modelsInput.addEventListener('change', function () {
-          modelsWrap.innerHTML = '';
-          Array.from(modelsInput.files).forEach((file, i) => {
-            const row = document.createElement('div');
-            row.className = 'form-group full';
-            row.style.border = '1px solid #334155';
-            row.style.padding = '10px';
-            row.style.borderRadius = '8px';
-            row.innerHTML = `<strong>${file.name}</strong>
-              <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px;">
-                <input type="text" name="model_label[${i}]" placeholder="Naziv 3D modela (auto: ${file.name.replace(/\.[^.]+$/, '')})">
-              </div>`;
-            modelsWrap.appendChild(row);
-          });
-        });
+        const imageRows = document.getElementById('image-rows');
+        const addImageBtn = document.getElementById('add-image-row');
+        let imageIndex = 0;
+
+        function addImageRow(file = null) {
+          const i = imageIndex++;
+          const name = file ? file.name : '';
+          const placeholder = name ? name.replace(/\.[^.]+$/, '') : 'npr. kuhinja ostrvo';
+          const row = createMetaRow(`
+            <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;">
+              <input type="file" name="project_images[]" accept=".jpg,.jpeg,.png,.webp,.gif" >
+              <button type="button" class="btn btn-danger btn-sm remove-row">Ukloni</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+              <input type="text" name="image_alt[${i}]" placeholder="Alt tekst (${placeholder})">
+              <input type="text" name="image_title[${i}]" placeholder="Title (${placeholder})">
+            </div>
+          `);
+          const input = row.querySelector('input[type="file"]');
+          if (file) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
+          }
+          row.querySelector('.remove-row').addEventListener('click', () => row.remove());
+          imageRows.appendChild(row);
+        }
+
+        addImageBtn.addEventListener('click', () => addImageRow());
+        addImageRow();
+
+        const modelRows = document.getElementById('model-rows');
+        const addModelBtn = document.getElementById('add-model-row');
+        let modelIndex = 0;
+
+        function addModelRow(file = null) {
+          const i = modelIndex++;
+          const name = file ? file.name : '';
+          const placeholder = name ? name.replace(/\.[^.]+$/, '') : 'npr. Kuhinja 3D model';
+          const row = createMetaRow(`
+            <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;">
+              <input type="file" name="model_archives[]" accept=".zip" >
+              <button type="button" class="btn btn-danger btn-sm remove-row">Ukloni</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px;">
+              <input type="text" name="model_label[${i}]" placeholder="Naziv modela (${placeholder})">
+            </div>
+          `);
+          const input = row.querySelector('input[type="file"]');
+          if (file) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
+          }
+          row.querySelector('.remove-row').addEventListener('click', () => row.remove());
+          modelRows.appendChild(row);
+        }
+
+        addModelBtn.addEventListener('click', () => addModelRow());
+        addModelRow();
       });
     </script>
 </head>
@@ -322,14 +346,13 @@ $current = 'projects';
                     <div class="form-group full"><label>Kratak uvod (excerpt)</label><textarea name="excerpt"></textarea></div>
                     <div class="form-group full"><label>Detaljan opis projekta (editor)</label><textarea id="content" name="content"></textarea></div>
 
-                    <div class="form-group full"><label>3D model ZIP fajlovi (može više)</label><input id="model_archives" type="file" name="model_archives[]" accept=".zip" multiple></div>
-                    <div id="models-meta-wrap" class="form-group full"></div>
+                    <div class="form-group full"><label>3D modeli (ZIP) — dodaj jedan ili više modela, svaki sa svojim imenom</label></div>
+                    <div id="model-rows" class="form-group full"></div>
+                    <div class="form-group full"><button id="add-model-row" class="btn btn-secondary" type="button">+ Dodaj još 3D modela</button></div>
 
-                    <div class="form-group"><label>Ručni path 3D modela (opciono)</label><input name="model_path" placeholder="blog/project-models/.../index.html"></div>
-                    <div class="form-group"><label>Naziv ručnog modela</label><input name="manual_model_label" placeholder="npr. Dnevna soba - varijanta A"></div>
-
-                    <div class="form-group full"><label>Fotografije projekta</label><input id="project_images" type="file" name="project_images[]" accept=".jpg,.jpeg,.png,.webp,.gif" multiple></div>
-                    <div id="images-meta-wrap" class="form-group full"></div>
+                    <div class="form-group full"><label>Fotografije projekta — mini galerija sa ALT i TITLE podacima</label></div>
+                    <div id="image-rows" class="form-group full"></div>
+                    <div class="form-group full"><button id="add-image-row" class="btn btn-secondary" type="button">+ Dodaj još fotografija</button></div>
 
                     <div class="form-group full"><button class="btn btn-primary" type="submit">Sačuvaj projekat</button></div>
                 </form>

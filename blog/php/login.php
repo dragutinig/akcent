@@ -112,6 +112,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $error === '') {
 </head>
 <body>
     <main class="login-wrap">
+        <nav class="login-top-nav" aria-label="Brza navigacija">
+            <a class="btn btn-secondary" href="<?php echo htmlspecialchars(getSiteBaseUrl()); ?>/">Nazad na sajt</a>
+            <a class="btn btn-info" href="<?php echo htmlspecialchars(getBlogBasePath()); ?>/">Otvori blog</a>
+        </nav>
         <section class="topbar" style="display:block;">
             <h1>Akcent Blog Admin</h1>
             <p class="muted" style="margin-top:6px;">Prijavi se za upravljanje postovima, kategorijama i komentarima.</p>
