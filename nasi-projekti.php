@@ -33,17 +33,27 @@ $projects = $repo->listProjects('published');
         <?php foreach ($projects as $project):
             $cover = $project['images'][0]['image_path'] ?? '';
             $coverUrl = $cover !== '' ? buildPublicUrlFromPath($cover) : '';
+            $excerpt = trim((string) ($project['excerpt'] ?? ''));
+            if ($excerpt === '') {
+                $excerpt = 'Pogledajte detalje projekta, fotografije i dostupne 3D modele.';
+            }
         ?>
-        <article class="project-card">
-            <?php if ($coverUrl !== ''): ?>
-                <img src="<?php echo htmlspecialchars($coverUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>">
-            <?php endif; ?>
-            <div class="project-card-content">
-                <div class="project-date"><?php echo htmlspecialchars(date('d.m.Y', strtotime($project['created_at']))); ?></div>
-                <h2><?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?></h2>
-                <p><?php echo htmlspecialchars((string) ($project['excerpt'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></p>
-                <a class="btn btn-dark" href="projekat.php?slug=<?php echo urlencode($project['slug']); ?>">Otvori projekat</a>
-            </div>
+        <article class="project-card post-card-like">
+            <a class="project-card-link" href="projekat.php?slug=<?php echo urlencode($project['slug']); ?>">
+                <div class="project-thumb-wrap">
+                    <?php if ($coverUrl !== ''): ?>
+                        <img src="<?php echo htmlspecialchars($coverUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>">
+                    <?php else: ?>
+                        <img src="img/kuhinjeGalerija/kuhinje-po-meri-beograd-0.webp" alt="<?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>">
+                    <?php endif; ?>
+                    <div class="project-badge-row"><span class="project-badge-item">Projekat</span></div>
+                </div>
+                <div class="project-card-content">
+                    <div class="project-date"><?php echo htmlspecialchars(date('d.m.Y', strtotime($project['created_at']))); ?></div>
+                    <h2><?php echo htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?></h2>
+                    <p><?php echo htmlspecialchars(mb_substr($excerpt, 0, 180), ENT_QUOTES, 'UTF-8'); ?></p>
+                </div>
+            </a>
         </article>
         <?php endforeach; ?>
     </section>

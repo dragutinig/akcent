@@ -189,6 +189,13 @@ a { color: #93c5fd; }
   padding: 0 16px;
 }
 
+.login-top-nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
 .img-thumb {
   width: 96px;
   height: 70px;
