@@ -294,44 +294,97 @@ p {
 }
 
 
-/* Stil za Cookie Banner */
+/* Modern cookie banner */
 .cookie-banner {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 20px;
-    text-align: center;
-    z-index: 1000;
+  position: fixed;
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1200;
+  display: flex;
+  justify-content: center;
 }
 
 .cookie-banner-content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  width: min(760px, 100%);
+  background: rgba(13, 16, 21, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+  padding: 1rem 1.15rem;
+  color: #f5f5f5;
+}
+
+.cookie-banner-title {
+  margin: 0 0 0.35rem;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+}
+
+.cookie-banner-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.cookie-banner-actions {
+  margin-top: 0.85rem;
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.cookie-btn {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.6rem 1rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cookie-btn-primary {
+  background: #ffce2d;
+  color: #111;
+}
+
+.cookie-btn-primary:hover {
+  background: #ffe073;
+}
+
+.cookie-btn-secondary {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.cookie-btn-secondary:hover {
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 576px) {
+  .cookie-banner {
+    left: 0.6rem;
+    right: 0.6rem;
+    bottom: 0.6rem;
+  }
+
+  .cookie-banner-content {
+    padding: 0.9rem;
+  }
+
+  .cookie-banner-actions {
     flex-direction: column;
-}
+  }
 
-.cookie-banner p {
-    margin-bottom: 15px;
+  .cookie-btn {
+    width: 100%;
+  }
 }
-
-.accept-button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.accept-button:hover {
-    background-color: #45a049;
-}
-
 
 .akcent-site-footer {
   background-color: #000 !important;
