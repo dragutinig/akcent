@@ -37,7 +37,7 @@
           </li>
           <li>
             <strong>Telefon:</strong>
-            <a href="tel:+381616485508" onclick="gtag_report_conversion(); return false;">+381 61 648 5508</a>
+            <a href="tel:0616485508" onclick="gtag_report_conversion(); return false;">0616485508</a>
           </li>
           <li><strong>Radno vreme:</strong> Pon–Pet 09:00–17:00, Sub 09:00–15:00</li>
         </ul>

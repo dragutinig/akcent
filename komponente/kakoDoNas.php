@@ -25,7 +25,7 @@
                     <p class="col-9 paragrafStyle">Dodajte nas na <a href="kontakt.php"
                             class="text-success">Viber</a>/<a href="kontakt.php" class="text-success">WhatsApp</a>,
                         pošaljite SMS ili pozovite:<br>
-                        +381628656542</p>
+                        0616485508</p>
                     <p class="col-9 paragrafStyle">Ili</p>
                     <p class="col-9 paragrafStyle">Pošaljite mejl na: akcentnamestaj@gmail.com</p>
                 </li>
