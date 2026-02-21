@@ -24,7 +24,7 @@
       <section class="akcent-footer-card akcent-footer-brand" aria-labelledby="footer-brand-title">
         <h2 id="footer-brand-title">Akcent Nameštaj</h2>
         <p>Izrada nameštaja po meri za stanove, kuće i poslovne prostore u Pančevu i Beogradu.</p>
-        <a class="akcent-footer-cta" href="https://akcent.rs/kontakt.php">Pošaljite upit</a>
+        <a class="akcent-footer-cta" href="kontakt.php">Pošaljite upit</a>
       </section>
 
       <section class="akcent-footer-card" aria-labelledby="footer-contact-title">
