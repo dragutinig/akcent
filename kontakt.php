@@ -62,6 +62,9 @@ function gtag_report_conversion(url) {
      <link rel="stylesheet" href="css/index.css">
      <link rel="stylesheet" href="css/lead-form.css">
     <meta name="theme-color" content="#fafafa">
+
+    <?php include("komponente/seo.php"); ?>
+
 </head>
 
 <body>
@@ -77,12 +80,12 @@ function gtag_report_conversion(url) {
         <!-- Kontakt sekcija -->
      <section style="padding: 100px;">
     <div class="contact-container">
-          <a style="color:inherit;" onclick="gtag_report_conversion(this.href);" href="tel:+381616485508">
+          <a style="color:inherit;" onclick="gtag_report_conversion(this.href);" href="tel:0616485508">
         <div class="contact-card phone">
             <div class="icon phone-icon"></div>
             <h3>Telefon</h3>
             <p>Ponekad zbog obima posla ne možemo odmah da se javimo. Kontaktirajte nas za brze informacije.</p>
-            <p class="text-primary h4">+381 61 648 55 08</p>
+            <p class="text-primary h4">0616485508</p>
         </div></a>
 
       
@@ -94,20 +97,20 @@ function gtag_report_conversion(url) {
     <p class="text-primary h4 email-address">akcentnamestaj@gmail.com</p>
 </div></a>
 
-     <a style="color:inherit;" onclick="gtag_report_conversion('viber://chat?number=%2B381616485508');" href="viber://chat?number=%2B381616485508">
+     <a style="color:inherit;" onclick="gtag_report_conversion('viber://chat?number=0616485508');" href="viber://chat?number=0616485508">
         <div class="contact-card viber">
             <div class="icon viber-icon"></div>
             <h3>Viber</h3>
             <p>Najviše komuniciramo putem Vibera. Pošaljite nam ideje, mere i pitanja.</p>
-            <p class="text-primary h4">+381 61 648 55 08</p>
+            <p class="text-primary h4">0616485508</p>
         </div></a>
         
-       <a style="color:inherit;" onclick="gtag_report_conversion('https://wa.me/381616485508');" href="https://wa.me/381616485508">
+       <a style="color:inherit;" onclick="gtag_report_conversion('https://wa.me/0616485508');" href="https://wa.me/0616485508">
         <div class="contact-card whatsapp">
             <div class="icon whatsapp-icon"></div>
             <h3>WhatsApp</h3>
             <p>Komunicirajte sa nama putem WhatsApp-a. Brzo i jednostavno!</p>
-            <p class="text-primary h4">+381 61 648 55 08</p>
+            <p class="text-primary h4">0616485508</p>
         </div></a>
     </div>
 </section>

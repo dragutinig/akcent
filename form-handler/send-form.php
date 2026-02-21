@@ -60,8 +60,8 @@ $signatureHtml = <<<HTML
   </p>
   <p style="margin: 0;">
     Tel:
-    <a href="tel:+381641234567" style="color: #1a73e8; text-decoration: none;">
-      +381 61 648 5508
+    <a href="tel:0616485508" style="color: #1a73e8; text-decoration: none;">
+      0616485508
     </a>
   </p>
   <p style="margin: 0;">
