@@ -68,6 +68,9 @@ $modelError = $modelUrl === '' ? '3D model nije dodat za ovaj projekat.' : '';
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/nav.css">
     <link rel="stylesheet" href="css/projekti.css">
+
+    <?php include("komponente/seo.php"); ?>
+
 </head>
 <body class="projects-page">
 <?php include __DIR__ . '/komponente/nav.php'; ?>

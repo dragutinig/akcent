@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js" lang="">
+<html class="no-js" lang="sr">
 
 <head>
     
@@ -66,6 +66,9 @@
   }
 }
 </script>
+
+
+    <?php include("komponente/seo.php"); ?>
 
 </head>
 
