@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js" lang="">
+<html class="no-js" lang="sr">
 
 <head>
     <!-- Google tag (gtag.js) -->
@@ -44,6 +44,9 @@ Bez skrivenih troškova.">
 
 
     <meta name="theme-color" content="#fafafa">
+
+    <?php include("komponente/seo.php"); ?>
+
 </head>
 
 <body>

@@ -77,6 +77,9 @@ Izrada i montaža po meri, bez skrivenih troškova.">
 </script>
 
 
+
+    <?php include("komponente/seo.php"); ?>
+
 </head>
 
 <body>
