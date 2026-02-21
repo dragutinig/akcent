@@ -64,6 +64,7 @@ let mybutton = document.getElementById("myBtn");
 window.onscroll = function() {scrollFunction()};
 
 function scrollFunction() {
+  if (!mybutton) return;
   if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
     mybutton.style.display = "block";
   } else {
@@ -81,11 +82,27 @@ function topFunction() {
 
 
 document.addEventListener("DOMContentLoaded", function() {
+    const acceptButton = document.getElementById("accept-cookies");
+    const cookieBanner = document.getElementById("cookie-banner");
+
     // Kada korisnik klikne na "Prihvatam"
-    document.getElementById("accept-cookies").addEventListener("click", function() {
-        // Postavi kolačić koji označava da je korisnik prihvatio kolačiće
-        document.cookie = "cookie_accepted=true; path=/; max-age=" + 60 * 60 * 24 * 365; // Kolačić važi 1 godinu
-        // Sakrij banner
-        document.getElementById("cookie-banner").style.display = "none";
+    if (acceptButton && cookieBanner) {
+      acceptButton.addEventListener("click", function() {
+          // Postavi kolačić koji označava da je korisnik prihvatio kolačiće
+          document.cookie = "cookie_accepted=true; path=/; max-age=" + 60 * 60 * 24 * 365; // Kolačić važi 1 godinu
+          // Sakrij banner
+          cookieBanner.style.display = "none";
+      });
+    }
+
+    // Core Web Vitals/UX: lazy-load slike ispod pregiba bez menjanja hero slika
+    const allImages = Array.from(document.querySelectorAll('img'));
+    allImages.forEach((img, index) => {
+      if (index > 1 && !img.hasAttribute('loading')) {
+        img.setAttribute('loading', 'lazy');
+      }
+      if (!img.hasAttribute('decoding')) {
+        img.setAttribute('decoding', 'async');
+      }
     });
 });

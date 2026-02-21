@@ -434,3 +434,13 @@ textarea {
     align-items: flex-start;
   }
 }
+
+/* UX accessibility baseline */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #ffc107;
+  outline-offset: 2px;
+}
