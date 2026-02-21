@@ -1,284 +1,244 @@
-
 * {
-    margin: 0;
-    padding: 0;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -ms-box-sizing: border-box;
-    box-sizing: border-box;
-  }
-  
-  a { text-decoration: none; 
-
+  box-sizing: border-box;
 }
-  
-  
-nav{
-    display: grid;
-    grid-template-columns: 1fr 3fr 1fr;
-    grid-template-rows: 1fr;
-    background-color: black;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+
+a {
+  text-decoration: none;
 }
-.logo{
-    justify-content: start;
-    display: grid;
-    align-items: center;
-    padding:15px;
-    
+
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
+  padding: 0.6rem 1.2rem;
+  background: rgba(10, 10, 10, 0.94);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
-.logo>a{
-    margin-left: 15px;
-    color: #f8c246;
-    background-color: #00ffff00 !important;
-    letter-spacing: 0.2em;
-    font-weight: 500;
-    padding:0 10px;
-    z-index:1;
+
+.logo {
+  display: flex;
+  align-items: center;
 }
-  
-  .nav-fostrap {
-    display: block;
-    margin-bottom: 15px 0;
 
-    -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-    -moz-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-    -ms-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-    -o-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-    border-radius: 3px;
-  }
-  
-  .nav-fostrap ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .nav-fostrap li {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    display: inline-block;
-    position: relative;
-    font-size: 14;
-    color: #def1f0;
-  }
-  
-  .nav-fostrap li a {
-    padding: 15px 20px;
-    font-size: 14;
-    color: #def1f0;
-    display: inline-block;
-    outline: 0;
-    font-weight: 400;
-  }
-  
-  .nav-fostrap li:hover ul.dropdown { display: block; }
-  
-  .nav-fostrap li ul.dropdown {
-    position: absolute;
-    display: none;
-    width: 200px;
-    background-color: black;
-    -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-    -moz-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-    -ms-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-    -o-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-    padding-top: 0;
-    top:50px;
-   
-  }
-  
-  .nav-fostrap li ul.dropdown li {
-    display: block;
-    list-style-type: none;
-  }
-  
-  .nav-fostrap li ul.dropdown li a {
-    padding: 15px 20px;
-    font-size: 15px;
-    color: #fff;
-    display: block;
-    font-weight: 400;
-  }
-  
-  .nav-fostrap li ul.dropdown li:last-child a { border-bottom: none; }
-  
-  .nav-fostrap li:hover a {
-  
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+}
 
-  }
-  
-  .nav-fostrap li:first-child:hover a { border-radius: 3px 0 0 3px; }
-  
-  .nav-fostrap li ul.dropdown li:hover a { background: rgba(0,0,0, .1); }
-  
-  .nav-fostrap li ul.dropdown li:first-child:hover a { border-radius: 0; }
-  
-  .nav-fostrap li:hover .arrow-down { border-top: 5px solid #fff; }
-  
-  .arrow-down {
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 5px solid #def1f0;
-    position: relative;
-    top: 15px;
-    right: -5px;
-    content: '';
-  }
-  .title-mobile {
-    display: none;
-  }
+.brand-image {
+  max-height: 52px;
+  width: auto;
+}
 
-
-  .dropdown{z-index: 100;}
-  @media only screen and (max-width:1199px) {
-  
-  .logo{
-    display: none;
-  }
-  .nav-fostrap {
-    top: 50px;
-    z-index: 10;
-    background: #fff;
-    width: 200px;
-    height: 100%;
-    display: block;
-    position: fixed;
-    left: -200px;
-    
-    -webkit-transition: left 0.25s ease;
-    -moz-transition: left 0.25s ease;
-    -ms-transition: left 0.25s ease;
-    -o-transition: left 0.25s ease;
-    transition: left 0.25s ease;
-    margin: 0;
-    border: 0;
-    border-radius: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    height: 100%;
-  }
-  .title-mobile {
-    position: absolute;
-    display: block;
-      top: 0px;
-      font-size: 20px;
-      left: 100px;
-      right: 100px;
-      text-align: center;
-      color: #FFF;
-  }
-  .nav-fostrap.visible {
-    left: 0px;
-    -webkit-transition: left 0.25s ease;
-    -moz-transition: left 0.25s ease;
-    -ms-transition: left 0.25s ease;
-    -o-transition: left 0.25s ease;
-    transition: left 0.25s ease;
-  }
-  
-  
-  .nav-bg-fostrap {
-    background-color: black;
-    display: inline-block;
-    vertical-align: middle;
-    width: 100%;
-    height: 50px;
-    margin: 0;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-
-    padding: 12px 0 0 10px;
-    -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-    -moz-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-    -ms-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-    -o-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
-  }
-  
-  .navbar-fostrap {
-    display: inline-block;
-    vertical-align: middle;
-    height: 50px;
-    cursor: pointer;
-   
-  }
-
-  
-  .navbar-fostrap span {
-    height: 2px;
-    background: #fff;
-    margin: 5px;
-    display: block;
-    width: 20px;
-  }
-  
-  .navbar-fostrap span:nth-child(2) { width: 20px; }
-  
-  .navbar-fostrap span:nth-child(3) { width: 20px; }
-  
-  .nav-fostrap ul { padding-top: 50px; 
+.nav-fostrap {
   display: block;
 }
-  
-  .nav-fostrap li { display: block; }
-  
-  .nav-fostrap li a {
-    display: block;
-    color: #505050;
-    font-weight: 600;
-  }
-  
-  .nav-fostrap li:first-child:hover a { border-radius: 0; }
-  
-  .nav-fostrap li ul.dropdown { position: relative; }
-  
-  .nav-fostrap li ul.dropdown li a {
 
-    border-bottom: none;
-    color: #fff !important;
+.nav-fostrap > ul {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-fostrap li {
+  position: relative;
+}
+
+.nav-fostrap a,
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 42px;
+  padding: 0.55rem 0.85rem;
+  border-radius: 10px;
+  color: #f3f3f3;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-fostrap a:hover,
+.nav-link:focus-visible,
+.nav-fostrap a:focus-visible {
+  background: rgba(255, 193, 7, 0.16);
+  color: #ffc107;
+  outline: none;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  left: 0;
+  min-width: 220px;
+  padding: 0.4rem;
+  margin: 0;
+  list-style: none;
+  border-radius: 12px;
+  background: rgba(20, 20, 20, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
+  display: none;
+}
+
+.dropdown a {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.has-dropdown:hover > .dropdown,
+.has-dropdown:focus-within > .dropdown,
+.has-dropdown.submenu-open > .dropdown {
+  display: block;
+}
+
+.arrow-down {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid currentColor;
+  opacity: 0.8;
+}
+
+.nav-bg-fostrap {
+  display: none;
+}
+
+/* Bootstrap adds a caret for .dropdown-toggle; force-hide any generated caret in main nav */
+.site-nav .submenu-toggle::after {
+  display: none !important;
+}
+
+/* Legacy spacer used with old absolute nav; keep it collapsed with sticky nav */
+header + div[style*="height:50px"] {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+@media (max-width: 1199px) {
+  .site-nav {
+    grid-template-columns: 1fr;
+    padding: 0;
+    min-height: 64px;
   }
-  
-  .nav-fostrap li:hover a {
-  
-    
+
+  .logo {
+    display: none;
   }
- 
-  .nav-fostrap li ul.dropdown li:hover a {
-    background: rgba(0,0,0,.1)!important;
-    color: #fff !important;
+
+  .nav-bg-fostrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 1rem;
+    min-height: 64px;
+    background: rgba(10, 10, 10, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
-  
-  .nav-fostrap li ul.dropdown li a { padding: 10px 10px 10px 30px; }
-  
-  .nav-fostrap li:hover .arrow-down { border-top: 5px solid #fff; }
-  
-  .arrow-down {
-    border-top: 5px solid #505050;
-    position: absolute;
-    top: 20px;
-    right: 10px;
+
+  .title-mobile {
+    display: inline-flex;
+    align-items: center;
   }
-  
-  .cover-bg {
-    background: rgba(0,0,0,0.5);
+
+  .brand-image-mobile {
+    max-height: 42px;
+    width: auto;
+  }
+
+  .navbar-fostrap {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+  }
+
+  .navbar-fostrap span {
+    width: 18px;
+    height: 2px;
+    background: #fff;
+  }
+
+  .nav-fostrap {
     position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    top: 64px;
+    left: -100%;
+    width: min(88vw, 360px);
+    height: calc(100vh - 64px);
+    background: #101010;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-y: auto;
+    transition: left 0.28s ease;
+    z-index: 230;
+    padding: 0.7rem;
   }
-  
 
- 
+  .nav-fostrap.visible {
+    left: 0;
+  }
+
+  .nav-fostrap > ul {
+    display: block;
+  }
+
+  .nav-fostrap li {
+    display: block;
+  }
+
+  .nav-fostrap a,
+  .nav-link {
+    width: 100%;
+    justify-content: space-between;
+    color: #fafafa;
+    padding: 0.85rem 0.95rem;
+  }
+
+  .dropdown {
+    position: static;
+    min-width: 0;
+    margin-top: 0.2rem;
+    margin-bottom: 0.4rem;
+    background: #1a1a1a;
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+  }
+
+  .dropdown a {
+    color: #dfdfdf;
+    padding-left: 1rem;
+  }
+
+  body.cover-bg::before {
+    content: "";
+    position: fixed;
+    inset: 64px 0 0 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 220;
+  }
+}
