@@ -6,7 +6,7 @@ $(document).ready(function(){
 
     function closeMobileNav() {
         $nav.removeClass('visible');
-        $('body').removeClass('cover-bg');
+        $('body').removeClass('cover-bg menu-open');
         $menuButton.attr('aria-expanded', 'false');
         $('.has-dropdown').removeClass('submenu-open');
         $('.submenu-toggle').attr('aria-expanded', 'false');
@@ -16,6 +16,7 @@ $(document).ready(function(){
         const willOpen = !$nav.hasClass('visible');
         $nav.toggleClass('visible', willOpen);
         $('body').toggleClass('cover-bg', willOpen);
+        $('body').toggleClass('menu-open', willOpen);
         $menuButton.attr('aria-expanded', willOpen ? 'true' : 'false');
     });
 

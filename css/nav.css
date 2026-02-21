@@ -195,7 +195,7 @@ header + div[style*="height:50px"] {
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     overflow-y: auto;
     transition: left 0.28s ease;
-    z-index: 230;
+    z-index: 320;
     padding: 0.7rem;
   }
 
@@ -239,6 +239,12 @@ header + div[style*="height:50px"] {
     position: fixed;
     inset: 64px 0 0 0;
     background: rgba(0, 0, 0, 0.55);
-    z-index: 220;
+    z-index: 150;
+    pointer-events: none;
+  }
+
+  body.menu-open {
+    overflow: hidden;
+    touch-action: none;
   }
 }
