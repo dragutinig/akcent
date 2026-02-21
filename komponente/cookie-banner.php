@@ -1,31 +1,53 @@
 <?php
-// Provera da li je korisnik već prihvatio kolačiće
-if (!isset($_COOKIE['cookie_accepted'])) {
-    $showBanner = true;
-} else {
-    $showBanner = false;
-}
+// Prikazi banner dok korisnik ne izabere opciju za kolačiće
+$cookieChoice = $_COOKIE['cookie_accepted'] ?? null;
+$showBanner = !in_array($cookieChoice, ['true', 'necessary'], true);
 ?>
 
 <?php if ($showBanner): ?>
-    <div id="cookie-banner" class="cookie-banner" style="position: fixed; bottom: 0; left: 0; right: 0; background: #222; color: #fff; padding: 15px; text-align: center; z-index: 9999;">
-        <p style="margin: 0; font-size: 14px;">
-            Naš sajt koristi kolačiće kako bi poboljšao korisničko iskustvo. Klikom na <strong>'Prihvatam'</strong> slažete se sa upotrebom kolačića.
-        </p>
-        <button id="accept-cookies" style="margin-top: 10px; padding: 8px 15px; background: #f1d600; border: none; border-radius: 5px; cursor: pointer;">
-            Prihvatam
-        </button>
+<div id="cookie-banner" class="cookie-banner" role="dialog" aria-live="polite" aria-label="Obaveštenje o kolačićima" aria-modal="false">
+  <div class="cookie-banner-content">
+    <p class="cookie-banner-title">Poštujemo vašu privatnost</p>
+    <p class="cookie-banner-text">
+      Koristimo neophodne kolačiće za rad sajta i opcione kolačiće za analitiku kako bismo unapredili korisničko iskustvo.
+    </p>
+    <div class="cookie-banner-actions">
+      <button id="accept-cookies" class="cookie-btn cookie-btn-primary" type="button">Prihvati sve</button>
+      <button id="reject-cookies" class="cookie-btn cookie-btn-secondary" type="button">Samo neophodni</button>
     </div>
+  </div>
+</div>
 
-    <script>
-        document.getElementById("accept-cookies").addEventListener("click", function() {
-            // Postavljamo kolačić na 1 godinu
-            var date = new Date();
-            date.setFullYear(date.getFullYear() + 1);
-            document.cookie = "cookie_accepted=true; expires=" + date.toUTCString() + "; path=/";
+<script>
+(function () {
+  var banner = document.getElementById('cookie-banner');
+  var acceptBtn = document.getElementById('accept-cookies');
+  var rejectBtn = document.getElementById('reject-cookies');
+  if (!banner) return;
 
-            // Sakrivamo baner
-            document.getElementById("cookie-banner").style.display = "none";
-        });
-    </script>
+  function setCookie(name, value, days) {
+    var date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = name + '=' + value + '; expires=' + date.toUTCString() + '; path=/; SameSite=Lax';
+  }
+
+  function closeBanner() {
+    banner.style.display = 'none';
+  }
+
+  if (acceptBtn) {
+    acceptBtn.addEventListener('click', function () {
+      setCookie('cookie_accepted', 'true', 365);
+      closeBanner();
+    });
+  }
+
+  if (rejectBtn) {
+    rejectBtn.addEventListener('click', function () {
+      setCookie('cookie_accepted', 'necessary', 365);
+      closeBanner();
+    });
+  }
+})();
+</script>
 <?php endif; ?>
