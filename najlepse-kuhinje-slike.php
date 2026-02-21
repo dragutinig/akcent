@@ -195,7 +195,7 @@
                     <p class="col-9 paragrafStyle"><b>Bilo da se nalazite u Beogradu, Pančevu ili okolini, 
                     kontaktirajte nas kako bismo zajedno kreirali kuhinju koja savršeno odgovara vašim potrebama.</b>
                     </p>
-                    <p class="col-9 paragrafStyle">&#128222; <strong>Pozovite nas:</strong> +381616485508 </p>
+                    <p class="col-9 paragrafStyle">&#128222; <strong>Pozovite nas:</strong> 0616485508 </p>
                     <p class="col-9 paragrafStyle">&#128231; <strong>Pišite nam:</strong> akcentnamestaj@gmail.com</p>
                     <p class="col-9 paragrafStyle">&#128205; <strong>Zakažite sastanak ili izlazak na teren:</strong> Pančevo / Beograd / Zemun</p>
                      <div class="row mt-5">

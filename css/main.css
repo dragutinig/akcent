@@ -98,6 +98,36 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter/static/Inter-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  color: #1f1f1f;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  overflow-x: clip;
+}
+
+h1, h2, h3, h4 {
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin-top: 0;
+}
+
+p {
+  margin-top: 0;
+}
+
 /* ==========================================================================
    Helper classes
    ========================================================================== */
@@ -313,4 +343,136 @@ textarea {
 .akcent-site-footer .table th,
 .akcent-site-footer a {
   color: #fff !important;
+}
+
+/* Modern footer */
+.akcent-site-footer {
+  background: linear-gradient(180deg, #101114 0%, #090a0c 100%);
+  color: #e7e7e7;
+  margin-top: 3rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.akcent-footer-main {
+  padding: 2.5rem 1rem 2rem;
+}
+
+.akcent-footer-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.akcent-footer-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1.1rem;
+}
+
+.akcent-footer-card h2 {
+  font-size: 1rem;
+  color: #ffc107;
+  margin-bottom: 0.8rem;
+}
+
+.akcent-footer-card p {
+  margin: 0 0 0.9rem;
+  line-height: 1.6;
+  color: #d8d8d8;
+}
+
+.akcent-footer-cta {
+  display: inline-block;
+  background: #ffc107;
+  color: #141414 !important;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+}
+
+.akcent-footer-list,
+.akcent-footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.akcent-footer-list a,
+.akcent-footer-links a {
+  color: #f4f4f4 !important;
+  text-underline-offset: 3px;
+  line-height: 1.45;
+}
+
+.akcent-footer-list a:hover,
+.akcent-footer-links a:hover,
+.social-links a:hover {
+  color: #ffc107 !important;
+}
+
+.akcent-footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.akcent-footer-bottom-inner {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.akcent-footer-bottom-inner p {
+  margin: 0;
+  color: #c9c9c9;
+}
+
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.social-links a {
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 1199px) {
+  .akcent-footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .akcent-footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .akcent-footer-main {
+    padding: 1.5rem 0.9rem 1.2rem;
+  }
+
+  .akcent-footer-bottom-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* UX accessibility baseline */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #ffc107;
+  outline-offset: 2px;
 }

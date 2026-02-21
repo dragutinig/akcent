@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js" lang="">
+<html class="no-js" lang="sr">
 
 <head>
   <!-- Google tag (gtag.js) -->
@@ -50,7 +50,7 @@
   "name": "Akcent Nameštaj",
   "image": "https://akcent.rs/img/akcent-namestaj-logo.png",
   "url": "https://akcent.rs",
-  "telephone": "+381616485508",
+  "telephone": "0616485508",
   "email": "akcentnamestaj@gmail.com",
   "address": {
     "@type": "PostalAddress",
@@ -79,31 +79,35 @@
 
         <div style="height:50px;"></div>
 
-        <section class="section section1 shadow-sm  rounded" style="background-image: url(../img/pozadine/kuhinje-po-meri-pozadina.webp);">
-            <article class="container vertical">
-                <header class="row align-self-start  ">
-                    <h1 class="main_h1 col-10">Nameštaj po meri: Uredjenje enterijera i poslovnih prostora</h1>
+        <section class="section section1 shadow-sm rounded" style="background-image: url(../img/pozadine/kuhinje-po-meri-pozadina.webp);">
+            <article class="container hero-wrap">
+                <div class="hero-content">
+                    <p class="hero-eyebrow">Nameštaj po meri • Beograd i Pančevo</p>
+                    <h1 class="main_h1">Nameštaj po meri za funkcionalan i moderan dom</h1>
+                    <p class="hero-lead">Vodimo ceo proces: savetovanje, 3D projekat, izrada i montaža. Jasni rokovi, provereni materijali i bez skrivenih troškova.</p>
 
-                </header>
-                <div class=" row align-self-center">
+                    <div class="hero-cta">
+                        <a href="proizvodi.php" class="button-37 btn btn-warning btn-lg">Pogledaj ponudu</a>
+                        <a href="kontakt.php" class="button-37 btn btn-outline-light btn-lg">Zatraži ponudu</a>
+                    </div>
 
-                    <p class="col-sm-8 col-10 paragrafStyle">Naša usluga obuhvata sve, od 3D projekta do kvalitetne
-                        izrade i montaže. Garantujemo vam najkvalitetnije kuhinje po meri, plakare po meri, ali i
-                        mogućnost za saradjujemo na opremanju kompletnog enterijera, uz otvorenu i
-                        jednostavnu saradnju. Bez skrivenih troškova.</p>
-
-                </div>
-
-
-                <div class="brzoBiranje row ">
-                    <div class="col-5 col-sm-4"> <a href="proizvodi.php"
-                            class="button-37 col-12  btn btn-warning btn-lg ">PROIZVODI</a></div>
-                    <div class="col-5 col-sm-4"> <a href="kontakt.php"
-                            class="button-37 col-12  btn btn-warning btn-lg ">Kontakt</a></div>
+                    <ul class="hero-points" aria-label="Ključne prednosti">
+                        <li>✓ Besplatna procena</li>
+                        <li>✓ 3D projektovanje</li>
+                        <li>✓ Precizna montaža</li>
+                    </ul>
                 </div>
             </article>
         </section>
-        
+
+        <section class="trust-strip">
+            <div class="container trust-grid">
+                <div class="trust-card"><strong>10+ godina iskustva</strong><span>Stotine realizovanih projekata</span></div>
+                <div class="trust-card"><strong>0616485508</strong><span>Telefon, Viber i WhatsApp</span></div>
+                <div class="trust-card"><strong>Pančevo i Beograd</strong><span>Dolazak na merenje po dogovoru</span></div>
+            </div>
+        </section>
+
            <section class="color shadow-sm">
             <article class="container ">
                 <header class="row header mb-5">
