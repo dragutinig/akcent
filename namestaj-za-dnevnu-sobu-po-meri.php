@@ -58,6 +58,9 @@
 }
 </script>
 
+
+    <?php include("komponente/seo.php"); ?>
+
 </head>
 
 <body>

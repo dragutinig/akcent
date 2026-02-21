@@ -41,6 +41,9 @@ Kvalitetna izrada, sa najboljim okovima. Bez skrivenih troškova.">
 
 
     <meta name="theme-color" content="#fafafa">
+
+    <?php include("komponente/seo.php"); ?>
+
 </head>
 
 <body>

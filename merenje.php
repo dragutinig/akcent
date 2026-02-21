@@ -40,6 +40,9 @@
 
 
     <meta name="theme-color" content="#fafafa">
+
+    <?php include("komponente/seo.php"); ?>
+
 </head>
 
 <body>

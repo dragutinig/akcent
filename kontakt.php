@@ -62,6 +62,9 @@ function gtag_report_conversion(url) {
      <link rel="stylesheet" href="css/index.css">
      <link rel="stylesheet" href="css/lead-form.css">
     <meta name="theme-color" content="#fafafa">
+
+    <?php include("komponente/seo.php"); ?>
+
 </head>
 
 <body>
